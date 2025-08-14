@@ -1,0 +1,545 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Anúncio Fullscreen com Abertura do Link na Tela</title>
+<style>
+  /* Reset e base */
+  * {
+    margin: 0; padding: 0; box-sizing: border-box;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  }
+  html, body {
+    height: 100%;
+    width: 100%;
+    overflow: hidden;
+  }
+
+  /* Body com imagem de fundo do anúncio */
+  body {
+    background-color: #5c2a81; /* fallback */
+    background-position: center center;
+    background-repeat: no-repeat;
+    background-size: cover;
+    height: 100vh;
+    width: 100vw;
+    color: white;
+    user-select: none;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: start;
+    overflow: hidden;
+  }
+
+  header {
+    width: 100%;
+    display: flex;
+    justify-content: flex-end;
+    gap: 12px;
+    padding: 12px 20px;
+    background: transparent; /* transparente para ver imagem */
+    position: relative;
+    z-index: 10;
+  }
+
+  button.control-btn {
+    margin-left:140px;
+    background: rgba(77, 42, 131, 0.7);
+    border: none;
+    border-radius: 8px;
+    color: white;
+    font-weight: 700;
+    font-size: 1.1rem;
+    padding: 10px 10px;
+    cursor: pointer;
+    box-shadow: 0 4px 10px rgba(77, 42, 131, 0.6);
+    transition: background-color 0.3s ease;
+    user-select: none;
+    min-width: 100px;
+    text-align: center;
+  }
+  button.control-btn:disabled,
+  button.control-btn[disabled] {
+    background: rgba(127, 112, 166, 0.7);
+    cursor: not-allowed;
+    box-shadow: none;
+  }
+  button.control-btn:hover:not(:disabled),
+  button.control-btn:focus:not(:disabled) {
+    background-color: #7a44d1;
+    outline: none;
+  }
+
+  /* Container que contém a img para SEO/acessibilidade, mas fica oculta */
+  #anuncio-img {
+    display: none;
+  }
+
+  /* Texto da URL do anúncio fixado na parte inferior central */
+  #anuncio-url-text {
+    display: none;
+    position: fixed;
+    bottom: 20px;
+    left: 50%;
+    transform: translateX(-50%);
+    max-width: 90vw;
+    font-size: 1.1rem;
+    text-align: center;
+    color: #ddd;
+    user-select: text;
+    text-shadow: 0 0 6px rgba(0,0,0,0.7);
+    pointer-events: none;
+    z-index: 8;
+  }
+
+  /* Form de criação do anúncio */
+  #form-criar-anuncio {
+    position: fixed;
+    bottom: 20px;
+    right: 20px;
+    background: rgba(77, 42, 131, 0.9);
+    border-radius: 14px;
+    padding: 20px;
+    width: 350px;
+    color: white;
+    z-index: 15;
+    display: none;
+    flex-direction: column;
+    box-shadow: 0 8px 28px rgba(77,42,131,0.9);
+  }
+  #form-criar-anuncio h3 {
+    margin-bottom: 16px;
+    font-weight: 700;
+    text-align: center;
+  }
+  #form-criar-anuncio label {
+    font-weight: 600;
+    margin-bottom: 6px;
+    display: block;
+  }
+  #form-criar-anuncio input[type="url"],
+  #form-criar-anuncio input[type="file"] {
+    width: 100%;
+    padding: 8px 10px;
+    border-radius: 10px;
+    border: none;
+    font-size: 1rem;
+    margin-bottom: 14px;
+    box-sizing: border-box;
+    background: #6a3fa0;
+    color: white;
+    border: 2px solid #7a44d1;
+    transition: border-color 0.3s ease;
+  }
+  #form-criar-anuncio input[type="url"]:focus {
+    outline: none;
+    border-color: #b18aec;
+  }
+  #form-criar-anuncio input[type="file"] {
+    cursor: pointer;
+    background: #7252b9;
+    color: white;
+  }
+  #form-criar-anuncio button {
+    align-self: center;
+    background: #7a44d1;
+    border: none;
+    border-radius: 14px;
+    padding: 12px 24px;
+    font-weight: 700;
+    font-size: 1.1rem;
+    color: white;
+    cursor: pointer;
+    box-shadow: 0 4px 14px rgba(122, 68, 209, 0.9);
+    user-select: none;
+    transition: background-color 0.3s ease;
+    min-width: 140px;
+  }
+  #form-criar-anuncio button:hover,
+  #form-criar-anuncio button:focus {
+    background-color: #b18aec;
+    outline: none;
+  }
+  #preview-imagem {
+    width: 100%;
+    max-height: 140px;
+    margin-bottom: 12px;
+    border-radius: 16px;
+    object-fit: contain;
+    box-shadow: 0 6px 18px rgba(0,0,0,0.4);
+    display: none;
+    user-select: none;
+  }
+  #msg-status {
+    text-align: center;
+    margin-top: 8px;
+    color: #fae082;
+    font-weight: 600;
+    font-size: 0.95rem;
+    min-height: 22px;
+    user-select: none;
+  }
+
+  /* Toast */
+  #toast-container {
+    position: fixed;
+    bottom: 20px;
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: 20000;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    max-width: 320px;
+    width: 90vw;
+    pointer-events: none;
+  }
+  .toast {
+    background-color: #6a3fa0;
+    color: white;
+    padding: 14px 20px;
+    border-radius: 12px;
+    box-shadow: 0 3px 15px rgba(106,63,160,0.65);
+    font-weight: 600;
+    letter-spacing: 0.02em;
+    font-size: 1rem;
+    opacity: 0;
+    transform: translateY(20px);
+    pointer-events: auto;
+    animation: slideIn 0.4s forwards, fadeOut 0.4s forwards 3.6s;
+    user-select: none;
+  }
+  @keyframes slideIn {
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+  @keyframes fadeOut {
+    to {
+      opacity: 0;
+      transform: translateY(-20px);
+    }
+  }
+
+  /* Responsividade para formulário */
+  @media (max-width: 400px) {
+    #form-criar-anuncio {
+      width: 90vw;
+      bottom: 10px;
+      right: 5vw;
+      padding: 16px;
+    }
+  }
+</style>
+</head>
+<body>
+
+<header role="banner">
+  <button id="btn-fechar" class="control-btn" disabled aria-disabled="true" aria-live="polite" aria-label="Botão fechar inativo por contagem regressiva">
+    Fechar (10s)
+  </button>
+  <button id="btn-criar" class="control-btn" aria-haspopup="dialog" aria-expanded="false" style="background:transparent; color:transparent;">Criar Anúncio</button>
+</header>
+
+<!-- Imagem invisível para controlar evento load e acessibilidade -->
+<img id="anuncio-img" alt="Imagem do anúncio" src="" />
+
+<!-- Texto da URL do anúncio fixo no rodapé -->
+<div id="anuncio-url-text" aria-label="Endereço do anúncio">Nenhum anúncio criado.</div>
+
+<!-- Formulário embutido para criação -->
+<form id="form-criar-anuncio" aria-label="Formulário para criação de novo anúncio">
+  <h3>Criar Novo Anúncio</h3>
+
+  <label for="inputImagem">Selecionar imagem</label>
+  <input type="file" id="inputImagem" accept="image/*" aria-required="true" />
+
+  <img src="ball.gif" id="preview-imagem" alt="Prévia da imagem selecionada" />
+
+  <label for="inputUrl">URL do anúncio</label>
+  <input type="url" id="inputUrl" placeholder="https://exemplo.com" aria-required="true" />
+
+  <button type="submit">Salvar Anúncio</button>
+
+  <div id="msg-status" role="status" aria-live="polite"></div>
+</form>
+
+<!-- Toast -->
+<div id="toast-container" role="region" aria-live="polite" aria-atomic="true"></div>
+
+<script type="module">
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/12.1.0/firebase-app.js";
+  import { getDatabase, ref, onValue, set } from "https://www.gstatic.com/firebasejs/12.1.0/firebase-database.js";
+  import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/12.1.0/firebase-auth.js";
+
+  const firebaseConfig = {
+    apiKey: "AIzaSyCE_vGty5XsV1YqdCi49Ck2xJDSFq284wc",
+    authDomain: "cliente-movicel.firebaseapp.com",
+    databaseURL: "https://cliente-movicel-default-rtdb.firebaseio.com",
+    projectId: "cliente-movicel",
+    storageBucket: "cliente-movicel.firebasestorage.app",
+    messagingSenderId: "215414688375",
+    appId: "1:215414688375:web:2c7d20a0c03c4c0fcfd472",
+    measurementId: "G-7F1RGP9GHV"
+  };
+
+  const apiKeyImgBB = 'e073e02267a1f0259cd69c562e780659';
+
+  const app = initializeApp(firebaseConfig);
+  const db = getDatabase(app);
+  const auth = getAuth();
+
+  const btnFechar = document.getElementById('btn-fechar');
+  const btnCriar = document.getElementById('btn-criar');
+  const anuncioImg = document.getElementById('anuncio-img');
+  const anuncioUrlText = document.getElementById('anuncio-url-text');
+  const previewImagem = document.getElementById('preview-imagem');
+  const formCriar = document.getElementById('form-criar-anuncio');
+  const inputImagem = document.getElementById('inputImagem');
+  const inputUrl = document.getElementById('inputUrl');
+  const msgStatus = document.getElementById('msg-status');
+  const toastContainer = document.getElementById('toast-container');
+
+  let currentUserUid = null;
+  let contagem = 10;
+  let contagemInterval = null;
+  let contagemIniciada = false;
+
+  // Mostra mensagem de toast
+  function showToast(msg, duration = 4000) {
+    const toast = document.createElement('div');
+    toast.className = 'toast';
+    toast.textContent = msg;
+    toastContainer.appendChild(toast);
+    setTimeout(() => {
+      toast.style.opacity = '0';
+      toast.style.transform = 'translateY(-20px)';
+      setTimeout(() => toast.remove(), 400);
+    }, duration);
+  }
+
+  // Atualiza o fundo do body e a URL do anúncio
+  function atualizarAnuncio(anuncio) {
+    if(anuncio?.imagemURL) {
+      document.body.style.backgroundImage = `url('${anuncio.imagemURL}')`;
+      anuncioImg.src = anuncio.imagemURL;
+      anuncioImg.alt = 'Imagem do anúncio salvo';
+    } else {
+      document.body.style.backgroundImage = 'none';
+      anuncioImg.src = '';
+      anuncioImg.alt = '';
+    }
+    if(anuncio?.url){
+      anuncioUrlText.textContent = anuncio.url;
+    } else {
+      anuncioUrlText.textContent = 'Nenhum anúncio criado.';
+    }
+  }
+
+  // Inicia o listener para anunciar em tempo real
+  function iniciarListenerAnuncio() {
+    const anuncioRef = ref(db, 'anuncioCompartilhado');
+    onValue(anuncioRef, (snapshot) => {
+      const data = snapshot.val();
+      atualizarAnuncio(data || {});
+      iniciarContagemSeNecessario();
+    }, (error) => {
+      showToast('Erro ao carregar anúncio.');
+      console.error(error);
+    });
+  }
+
+  // Inicia a contagem regressiva se a imagem já carregou e ainda não iniciou
+  function iniciarContagemSeNecessario() {
+    if (!contagemIniciada && anuncioImg.complete && anuncioImg.naturalWidth !== 0) {
+      contagemIniciada = true;
+      iniciarContagem();
+    }
+  }
+
+  // Contagem regressiva do botão fechar
+  function iniciarContagem() {
+    btnFechar.disabled = true;
+    btnFechar.setAttribute('aria-disabled', 'true');
+    btnFechar.textContent = `Fechar (${contagem}s)`;
+
+    contagemInterval = setInterval(() => {
+      contagem--;
+      if (contagem > 0) {
+        btnFechar.textContent = `Fechar (${contagem}s)`;
+      } else {
+        clearInterval(contagemInterval);
+        btnFechar.disabled = false;
+        btnFechar.setAttribute('aria-disabled', 'false');
+        btnFechar.textContent = 'Fechar';
+      }
+    }, 1000);
+  }
+
+  // Monitorar evento load da imagem para iniciar a contagem
+  anuncioImg.addEventListener('load', () => {
+    iniciarContagemSeNecessario();
+  });
+
+  // Detecta autenticação do usuário
+  function iniciarApp() {
+    onAuthStateChanged(auth, (user) => {
+      if(user){
+        currentUserUid = user.uid;
+        iniciarListenerAnuncio();
+      } else {
+        currentUserUid = null;
+        atualizarAnuncio({});
+        showToast('Faça login para criar/visualizar anúncio.');
+        btnFechar.disabled = true;
+        btnFechar.setAttribute('aria-disabled', 'true');
+        btnFechar.textContent = 'Fechar';
+      }
+    });
+  }
+
+  // Botão fechar: redireciona se habilitado
+  btnFechar.addEventListener('click', () => {
+    if(!btnFechar.disabled){
+      window.location.href = 'home.html';
+    }
+  });
+
+  // Abre/fecha formulário de criação
+  let formAberto = false;
+  btnCriar.addEventListener('click', () => {
+    formAberto = !formAberto;
+    if(formAberto){
+      formCriar.style.display = 'flex';
+      btnCriar.setAttribute('aria-expanded', 'true');
+      msgStatus.textContent = '';
+      previewImagem.style.display = 'none';
+      previewImagem.src = '';
+      inputImagem.value = '';
+      inputUrl.value = '';
+    } else {
+      formCriar.style.display = 'none';
+      btnCriar.setAttribute('aria-expanded', 'false');
+    }
+  });
+
+  // Preview imagem ao selecionar arquivo
+  inputImagem.addEventListener('change', () => {
+    if(inputImagem.files && inputImagem.files[0]){
+      const url = URL.createObjectURL(inputImagem.files[0]);
+      previewImagem.src = url;
+      previewImagem.style.display = 'block';
+      msgStatus.textContent = '';
+    } else {
+      previewImagem.src = '';
+      previewImagem.style.display = 'none';
+    }
+  });
+
+  // Abrir link do anúncio ao clicar na url no rodapé
+  anuncioUrlText.addEventListener('click', () => {
+    const text = anuncioUrlText.textContent;
+    if(text && text !== 'Nenhum anúncio criado.'){
+      window.open(text, '_blank', 'noopener');
+    }
+  });
+
+  // Upload da imagem para ImgBB
+  async function uploadImagemImgBB(file) {
+    msgStatus.textContent = 'Enviando imagem...';
+    try {
+      const formData = new FormData();
+      formData.append('image', file);
+      const res = await fetch(`https://api.imgbb.com/1/upload?key=${apiKeyImgBB}`, {
+        method: 'POST',
+        body: formData
+      });
+      const data = await res.json();
+      if(data.success){
+        msgStatus.textContent = 'Imagem carregada com sucesso.';
+        return data.data.url;
+      } else {
+        msgStatus.textContent = 'Erro no upload da imagem.';
+        return null;
+      }
+    } catch(e){
+      msgStatus.textContent = 'Falha ao enviar a imagem.';
+      return null;
+    }
+  }
+
+  // Salvar anúncio no Realtime Database
+  formCriar.addEventListener('submit', async (e) => {
+    e.preventDefault();
+
+    if(!currentUserUid) {
+      msgStatus.style.color = '#ef9a9a';
+      msgStatus.textContent = 'Faça login para criar um anúncio.';
+      return;
+    }
+
+    const url = inputUrl.value.trim();
+    if(!url || !url.startsWith('http')){
+      msgStatus.style.color = '#ef9a9a';
+      msgStatus.textContent = 'Insira uma URL válida começando com http(s).';
+      inputUrl.focus();
+      return;
+    }
+
+    let imagemURL = null;
+    if(inputImagem.files && inputImagem.files[0]){
+      imagemURL = await uploadImagemImgBB(inputImagem.files[0]);
+      if(!imagemURL) return;
+    }
+
+    const anuncioParaSalvar = {
+      url,
+      imagemURL: imagemURL || document.body.style.backgroundImage.slice(5, -2)
+    };
+
+    try {
+      await set(ref(db, 'anuncioCompartilhado'), anuncioParaSalvar);
+      showToast('Anúncio salvo com sucesso!');
+      formCriar.style.display = 'none';
+      btnCriar.setAttribute('aria-expanded', 'false');
+      formAberto = false;
+      msgStatus.textContent = '';
+      previewImagem.style.display = 'none';
+      previewImagem.src = '';
+      inputImagem.value = '';
+      inputUrl.value = '';
+    } catch (err) {
+      msgStatus.style.color = '#ef9a9a';
+      msgStatus.textContent = 'Erro ao salvar anúncio.';
+      console.error(err);
+    }
+  });
+
+  // Evento para abrir link ao clicar em qualquer área da tela que não seja botão
+  document.body.addEventListener('click', (event) => {
+    // Ignorar se o clique for em botões fechar ou criar, ou no formulário
+    const alvo = event.target;
+    if (
+      alvo === btnFechar || 
+      alvo === btnCriar || 
+      formCriar.contains(alvo) ||
+      alvo === inputImagem ||
+      alvo === inputUrl ||
+      alvo === previewImagem
+    ) {
+      return;
+    }
+    // Abrir URL salvo se existir
+    const url = anuncioUrlText.textContent;
+    if(url && url !== 'Nenhum anúncio criado.') {
+      window.open(url, '_blank', 'noopener');
+    }
+  }, false);
+
+  window.addEventListener('DOMContentLoaded', iniciarApp);
+</script>
+</body>
+</html>

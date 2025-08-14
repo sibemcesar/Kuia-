@@ -1,0 +1,2315 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>MeuApp Roxo</title>
+  <style>
+    /* Reset básico */
+    * {
+      margin: 0; padding: 0; box-sizing: border-box;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    }
+    html, body {
+      height: 100%; background: #f5f0fa; color: #3f0071;
+      overflow-x: hidden;
+    }
+    header {
+      background-color: #5a2a82;
+      color: white;
+      height: 56px; padding: 0 16px;
+      display: flex; align-items: center;
+      font-weight: 700; font-size: 1.4rem;
+      box-shadow: 0 2px 4px rgba(90,42,130,0.5);
+      user-select: none;
+      position: relative; z-index: 10;
+    }
+  header button1 {
+    justify-content: flex-end; /* envia tudo para a direita */
+    align-items: center; /* centraliza verticalmente */
+    margin-left: auto;
+    background: transparent;
+    border: none;
+    color: white;
+    font-size: 1.5em;
+    cursor: pointer;
+    user-select: none;
+    padding: 0 10px;
+  }
+    main {
+      height: calc(100vh - 56px);
+      display: flex; flex-direction: column;
+      background: white;
+    }
+    #button-container {
+      background: #5a2a82;
+      display: flex; justify-content: space-around;
+      align-items: center;
+      height: 56px;
+      user-select: none;
+      position: relative; z-index: 9;
+    }
+    #button-container button {
+      background: transparent;
+      border: none;
+      color: #d9cfff;
+      font-size: 0;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 4px;
+      width: 56px;
+      height: 56px;
+      border-radius: 8px;
+      transition: background-color 0.25s ease, color 0.25s ease;
+    }
+    #button-container button svg {
+      width: 26px; height: 26px;
+      stroke: currentColor;
+      stroke-width: 2.2;
+      stroke-linecap: round;
+      stroke-linejoin: round;
+      pointer-events: none;
+      transition: stroke 0.25s ease;
+    }
+    #button-container button:hover,
+    #button-container button:focus-visible {
+      background-color: #8e54c8;
+      color: white;
+      outline: none;
+    }
+    #button-container button.active {
+      background-color: #5a2a82;
+      color: red;
+      box-shadow: 0 0 8px rgba(90, 42, 130, 0.6);
+    }
+    #content {
+      width: 100%;
+      height: 100%;
+      flex-grow: 1;
+      background: white;
+      color: #3f0071;
+      overflow-y: auto;
+      padding: 0;
+      position: relative;
+    }
+    /* As divs de intent ocupam toda área e só uma fica visível */
+    .intent-panel {
+      display: none;
+      padding: 0px;
+      max-width: 720px;
+      margin: auto;
+      line-height: 1.5;
+    }
+    .intent-panel.active {
+      display: block;
+    }
+    .intent-panel h2 {
+      margin-bottom: 12px;
+      font-weight: 700;
+      font-size: 1.6rem;
+    }
+    .intent-panel img {
+      max-width: 100%;
+      height: auto;
+      border-radius: 6px;
+      margin: 10px 0;
+    }
+    .intent-panel ul, .intent-panel ol {
+      padding-left: 20px;
+      margin: 10px 0;
+    }
+    a {
+      color: #5a2a82;
+      text-decoration: none;
+    }
+    a:hover, a:focus {
+      text-decoration: underline;
+    }
+  </style>
+</head>
+<body>
+
+<header>
+  KUIA+
+  <button class="button1" id="btnAbrirCriar" aria-label="Criar notificações">
+    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" width="24" height="24" stroke="white" stroke-width="1.5" class="size-6">
+  <path stroke-linecap="round" stroke-linejoin="round" d="m16.862 4.487 1.687-1.688a1.875 1.875 0 1 1 2.652 2.652L10.582 16.07a4.5 4.5 0 0 1-1.897 1.13L6 18l.8-2.685a4.5 4.5 0 0 1 1.13-1.897l8.932-8.931Zm0 0L19.5 7.125M18 14v4.75A2.25 2.25 0 0 1 15.75 21H5.25A2.25 2.25 0 0 1 3 18.75V8.25A2.25 2.25 0 0 1 5.25 6H10" />
+</svg>
+</button>
+</header>
+
+<main>
+  <!-- Botões de navegação -->
+  <nav id="button-container" role="tablist" aria-label="Navegação principal">
+    <button data-intent="home" aria-selected="true" role="tab" tabindex="0" class="active" title="Início">
+      <svg viewBox="0 0 24 24" fill="none" aria-hidden="true" focusable="false" >
+        <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2h-4a2 2 0 0 1-2-2v-7H9v7a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2z" />
+      </svg>
+    </button>
+    <button data-intent="profile" aria-selected="false" role="tab" tabindex="-1" title="Perfil">
+      <svg viewBox="0 0 24 24" fill="none" aria-hidden="true" focusable="false" >
+        <path d="M20 21v-2a4 4 0 0 0-3-3.87" />
+        <path d="M4 21v-2a4 4 0 0 1 3-3.87" />
+        <circle cx="12" cy="7" r="4" />
+      </svg>
+    </button>
+    <button data-intent="settings" aria-selected="false" role="tab" tabindex="-1" title="Configurações">
+      <svg viewBox="0 0 24 24" fill="none" aria-hidden="true" focusable="false" >
+        <circle cx="12" cy="12" r="3" />
+        <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 1 1-4 0v-.09a1.65 1.65 0 0 0-1-1.51 1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 1 1 0-4h.09a1.65 1.65 0 0 0 1.51-1 1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 1 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 1 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z" />
+      </svg>
+    </button>
+  </nav>
+
+  <!-- Conteúdos das intents dentro do #content, apenas uma aparece -->
+  <section id="content" role="tabpanel" tabindex="0" aria-live="polite" aria-label="Conteúdo da página">
+    <div id="intent-home" class="intent-panel active" aria-hidden="false">
+     <!DOCTYPE html>
+<html lang="pt">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Chat Movicel - Notificações com ImgBB, Telefone, Data e Zoom</title>
+<style>
+  
+  header1 {
+    flex-shrink: 0;
+    background-color: #b3002d;
+    color: white;
+    height: 56px;
+    display: flex;
+    align-items: center;
+    padding: 0 12px 0 16px;
+    box-sizing: border-box;
+  }
+  header button {
+    margin-left: auto;
+    background: transparent;
+    border: none;
+    color: white;
+    font-size: 1.5em;
+    cursor: pointer;
+    user-select: none;
+    padding: 0 10px;
+  }
+  header button:active {
+    opacity: 0.7;
+  }
+  header .title {
+    flex-grow: 1;
+    font-weight: 700;
+    text-align: center;
+    font-size: 1.2em;
+    user-select: none;
+  }
+  
+  #app {
+    width: 100%;
+    height: 100%;
+    flex-grow: 1;
+    position: relative;
+    background: #fff;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+    padding: 0;
+  }
+  
+  #notificacoesGlobaisList {
+    flex-grow: 1;
+    overflow-y: auto;
+    padding: 20px 16px;
+    box-sizing: border-box;
+  }
+  #notificacoesGlobaisList p.loading {
+    text-align: center;
+    color: #800018;
+    margin-top: 20px;
+    font-weight: bold;
+  }
+  #notificacoesGlobaisList .notificacao {
+    margin-bottom: 20px;
+    padding-bottom: 12px;
+    border-bottom: 2px solid #b3002d;
+    position: relative;
+    background: white;
+    border-radius: 12px;
+    padding: 14px 18px;
+    box-shadow: 0 2px 6px rgba(179,0,45,0.15);
+  }
+  #notificacoesGlobaisList .notificacao p.texto {
+    margin: 0 0 10px 0;
+    white-space: pre-line;
+    word-break: break-word;
+    font-size: 1.05em;
+    color:black;
+  }
+  #notificacoesGlobaisList .notificacao img {
+    max-width: 100%;
+    border-radius: 8px;
+    margin-top: 8px;
+    object-fit: contain;
+    max-height: 180px;
+    display: block;
+    cursor: pointer;
+    transition: transform 0.3s ease;
+  }
+  #notificacoesGlobaisList .notificacao img:hover {
+    transform: scale(1.03);
+  }
+  .botaoLink, .botaoTelefone {
+    margin-top: 8px;
+    background-color: #0b66c2;
+    border: none;
+    border-radius: 8px;
+    color: white;
+    font-weight: bold;
+    padding: 8px 16px;
+    cursor: pointer;
+    user-select: none;
+    transition: background-color 0.25s;
+    display: inline-block;
+    text-decoration: none;
+  }
+  .botaoLink:hover, .botaoTelefone:hover {
+    background-color: #084d88;
+  }
+
+  /* Badges */
+  .badge-categoria {
+    position: absolute;
+    top: 70%;
+    right: 16px;
+    background-color: #b3002d;
+    color: white;
+    font-weight: 700;
+    font-size: 0.9em;
+    border-radius: 12px;
+    padding: 4px 12px;
+    user-select: none;
+    pointer-events: none;
+    text-transform: uppercase;
+  }
+  .email-criador {
+    font-size: 0.85em;
+    color: #800018;
+    margin-top: 8px;
+    font-style: italic;
+  }
+  .tempo-restante {
+    font-size: 0.9em;
+    color: #fff;
+    font-weight: 700;
+    margin-top: 6px;
+  }
+
+  /* Overlay */
+  .overlay {
+    display: none;
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.85);
+    z-index: 24000;
+    justify-content: center;
+    align-items: center;
+    padding: 0;
+  }
+  .overlay.active {
+    display: flex;
+  }
+  .overlay-content-fullscreen {
+    background: white;
+    border-radius: 0;
+    width: 100vw;
+    height: 100vh;
+    box-sizing: border-box;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+  }
+  .overlay-header {
+    flex-shrink: 0;
+    background-color: #5a2a82;
+    color: white;
+    height: 56px;
+    display: flex;
+    align-items: center;
+    padding: 0 12px 0 16px;
+    box-sizing: border-box;
+  }
+  .overlay-header h2 {
+    flex-grow: 1;
+    font-weight: 700;
+    font-size: 1.0em;
+    text-align: center;
+    margin: 0;
+    user-select: none;
+  }
+  .close-btn {
+    background: transparent;
+    border: none;
+    color: white;
+    font-size: 2.0em;
+    cursor: pointer;
+    font-weight: 700;
+    user-select: none;
+    line-height: 1;
+    padding: 0;
+    margin-right: 8px;
+    transition: color 0.25s;
+  }
+  .close-btn:hover {
+    color: #ff5b5b;
+  }
+  .overlay-main {
+    flex-grow: 1;
+    display: flex;
+    flex-direction: column;
+     overflow-y: auto;
+    background: #fae6eb;
+  }
+  #notificacaoInput, #telefoneInput, #categoriaSelect {
+    border: none;
+    border-radius: 0px;
+    padding: 16px 20px;
+    font-size: 1.3em;
+    font-family: Arial, sans-serif;
+    line-height: 1.4em;
+    margin-bottom: 24px;
+    width: 100%;
+    box-sizing: border-box;
+    box-shadow: 0 2px 6px rgba(179,0,45,0.12);
+    transition: box-shadow 0.3s;
+  }
+  #notificacaoInput:focus, #telefoneInput:focus, #categoriaSelect:focus, #imagemFileInput:focus {
+    outline: none;
+    box-shadow: 0 2px 10px rgba(179,0,45,0.4);
+  }
+  #notificacaoInput {
+    height: 60px;
+    resize: vertical;
+  }
+  #categoriaSelect {
+    appearance: none;
+    -webkit-appearance: none;
+    -moz-appearance: none;
+    background: white url('data:image/svg+xml;utf8,<svg fill="none" stroke="%23b3002d" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><polyline points="6 9 12 15 18 9"></polyline></svg>') no-repeat right 16px center;
+    background-size: 18px 18px;
+    cursor: pointer;
+  }
+  #telefoneInput {
+    height: 44px;
+  }
+  #imagemFileInput {
+    border: none;
+    margin-bottom: 24px;
+    cursor: pointer;
+    display: none;
+  }
+  #btnEnviarNotificacao, #btnApagarTodas {
+    background-color: #5a2a82;
+    width: 100%;
+    border: none;
+    color: white;
+    font-weight: 800;
+    font-size: 1.0em;
+    border-radius: 2px;
+    cursor: pointer;
+    padding: 10px 20px;
+    user-select: none;
+    flex-grow: 1;
+    transition: background-color 0.3s, transform 0.15s;
+  }
+  #btnEnviarNotificacao:hover:not(:disabled), #btnApagarTodas:hover {
+    background-color: #800018;
+  }
+  #btnEnviarNotificacao:disabled {
+    background-color: #e89aa7;
+    cursor: default;
+  }
+  #btnEnviarNotificacao:active, #btnApagarTodas:active {
+    transform: scale(0.96);
+  }
+  #btnEscolherImagem {
+    background: #5a2a82;
+    color: white;
+    padding: 10px 20px;
+    font-weight: 700;
+    border-radius: 12px;
+    cursor: pointer;
+    margin-bottom: 24px;
+    user-select: none;
+    border: none;
+    font-size: 1.1em;
+    transition: background-color 0.3s;
+  }
+  #btnEscolherImagem:hover {
+    background-color: #800018;
+  }
+  #minhasNotificacoesList {
+    width: 100%;
+    max-height: 210px;
+    overflow-y: auto;
+    border-radius: 14px;
+    padding: 0px;
+    background: white;
+    font-size: 1.05em;
+    box-shadow: 0 4px 12px rgba(179,0,45,0.15);
+    user-select: none;
+  }
+  #minhasNotificacoesList p {
+    width: 100%;
+    margin: 10px 0;
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: 12px;
+    word-break: break-word;
+    white-space: pre-line;
+    position: relative;
+  }
+  #minhasNotificacoesList p span.texto {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+  }
+  #minhasNotificacoesList p span.texto img {
+    max-width: 100%;
+    border-radius: 10px;
+    margin-top: 8px;
+    object-fit: contain;
+    max-height: 120px;
+    cursor: pointer;
+  }
+  #minhasNotificacoesList button.apagarItem {
+    background: #5a2a82;
+    border: none;
+    border-radius: 10px;
+    color: white;
+    font-weight: 700;
+    font-size: 1em;
+    padding: 10px 16px;
+    cursor: pointer;
+    user-select: none;
+    height: 36px;
+    white-space: nowrap;
+    transition: background-color 0.25s;
+  }
+  #minhasNotificacoesList button.apagarItem:hover {
+    background: #880000;
+  }
+
+  /* Toast container */
+  #toastContainer {
+    position: fixed;
+    top: 20px;
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: 26000;
+    max-width: 360px;
+    pointer-events: none;
+  }
+  .toast {
+    background: #5a2a82;
+    color: white;
+    padding: 14px 22px;
+    border-radius: 14px;
+    box-shadow: 0 4px 12px rgba(179,0,45,0.5);
+    margin-top: 12px;
+    user-select: none;
+    font-weight: 700;
+    font-size: 1.1em;
+    opacity: 0;
+    animation: fadeInOut 4s forwards;
+    pointer-events: auto;
+    display: flex;
+    justify-content: center;
+  }
+  @keyframes fadeInOut {
+    0% {opacity: 0;}
+    10% {opacity: 1;}
+    90% {opacity: 1;}
+    100% {opacity: 0;}
+  }
+
+  /* Estilo para imagem em fullscreen */
+  #overlayImagem {
+    display: none;
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.95);
+    z-index: 27000;
+    justify-content: center;
+    align-items: center;
+    cursor: zoom-out;
+  }
+  #overlayImagem.active {
+    display: flex;
+  }
+  #overlayImagem img {
+    max-width: 90%;
+    max-height: 90%;
+    border-radius: 12px;
+    box-shadow: 0 0 30px rgba(255,255,255,0.8);
+  }
+  
+</style>
+
+
+</head>
+<body>
+
+
+
+<div id="app">
+  <div id="notificacoesGlobaisList" aria-live="polite" aria-atomic="true" aria-relevant="all">
+    <p class="loading">Carregando publicações...</p>
+  </div>
+</div>
+
+<!-- Toast container -->
+<div id="toastContainer" aria-live="assertive" aria-atomic="true"></div>
+
+<!-- Overlay criar notificações -->
+<div id="overlayCriar" class="overlay" role="dialog" aria-modal="true" aria-labelledby="tituloCriar">
+  <div class="overlay-content-fullscreen" role="document">
+    <header class="overlay-header">
+      <button class="close-btn" id="btnFecharCriar" aria-label="Fechar criador">&times;</button>
+      <h2 id="tituloCriar">Criar e Gerenciar suas Publicações</h2>
+    </header>
+    <main class="overlay-main">
+      <input id="notificacaoInput" placeholder="Digite sua notificação aqui..." aria-required="true"></input>
+      <select id="categoriaSelect" aria-label="Categoria da notificação" aria-required="true">
+        <option value="" disabled selected>Selecione uma categoria</option>
+        <option value="Alerta">Alerta</option>
+        <option value="Promoção">Promoção</option>
+        <option value="VPNs">VPNs</option>
+        <option value="Outros">Outros</option>
+      </select>
+      <input type="tel" id="telefoneInput" placeholder="Número para ligação (opcional)" aria-label="Número de telefone para ligação" pattern="[\d+\-\s()]*" />
+      <button id="btnEscolherImagem" type="button" aria-label="Selecionar imagem para upload">Selecionar Imagem (Opcional)</button>
+      <input type="file" id="imagemFileInput" accept="image/*" aria-label="Selecionar imagem para upload" />
+  <button id="btnEnviarNotificacao" disabled>Enviar Notificação</button>
+      <br>
+        <button id="btnApagarTodas">Apagar Todas</button>
+      <div id="btnSendContainer">     
+      <div id="minhasNotificacoesList" aria-live="polite" aria-atomic="true" aria-relevant="all">
+        <p>Suas notificações aparecerão aqui...</p>
+      </div>
+  </div>     
+    </main>
+  </div>
+</div>
+
+<!-- Overlay imagem fullscreen -->
+<div id="overlayImagem" aria-modal="true" role="dialog" tabindex="0">
+  <img src="" alt="Imagem ampliada" />
+</div>
+
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/12.0.0/firebase-app.js";
+import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/12.0.0/firebase-auth.js";
+import { getDatabase, ref, onValue, push, remove } from "https://www.gstatic.com/firebasejs/12.0.0/firebase-database.js";
+
+const apiKeyImgBB = 'e073e02267a1f0259cd69c562e780659';
+
+const firebaseConfig = {
+  apiKey: "AIzaSyCE_vGty5XsV1YqdCi49Ck2xJDSFq284wc",
+  authDomain: "cliente-movicel.firebaseapp.com",
+  databaseURL: "https://cliente-movicel-default-rtdb.firebaseio.com",
+  projectId: "cliente-movicel",
+  storageBucket: "cliente-movicel.firebasestorage.app",
+  messagingSenderId: "215414688375",
+  appId: "1:215414688375:web:2c7d20a0c03c4c0fcfd472",
+  measurementId: "G-7F1RGP9GHV"
+};
+
+const app = initializeApp(firebaseConfig);
+const auth = getAuth(app);
+const db = getDatabase(app);
+
+const btnAbrirCriar = document.getElementById("btnAbrirCriar");
+const btnVoltar = document.getElementById("btnVoltar");
+const overlayCriar = document.getElementById("overlayCriar");
+const btnFecharCriar = document.getElementById("btnFecharCriar");
+const notificacaoInput = document.getElementById("notificacaoInput");
+const telefoneInput = document.getElementById("telefoneInput");
+const categoriaSelect = document.getElementById("categoriaSelect");
+const btnEnviarNotificacao = document.getElementById("btnEnviarNotificacao");
+const btnApagarTodas = document.getElementById("btnApagarTodas");
+const minhasNotificacoesList = document.getElementById("minhasNotificacoesList");
+const notificacoesGlobaisList = document.getElementById("notificacoesGlobaisList");
+const toastContainer = document.getElementById("toastContainer");
+const imagemFileInput = document.getElementById("imagemFileInput");
+const btnEscolherImagem = document.getElementById("btnEscolherImagem");
+
+const overlayImagem = document.getElementById("overlayImagem");
+const overlayImagemImg = overlayImagem.querySelector("img");
+
+let usuarioAtual = null;
+let minhasNotificacoesRef = null;
+let ouvinteMinhasNotificacoes = null;
+
+
+btnEscolherImagem.onclick = () => {
+  imagemFileInput.click();
+};
+
+// Fechar overlay imagem ao clicar fora ou ESC
+overlayImagem.onclick = (e) => {
+  if (e.target === overlayImagem || e.target === overlayImagemImg) {
+    overlayImagem.classList.remove("active");
+    overlayImagemImg.src = "";
+  }
+};
+document.addEventListener("keydown", (e) => {
+  if (e.key === "Escape" && overlayImagem.classList.contains("active")) {
+    overlayImagem.classList.remove("active");
+    overlayImagemImg.src = "";
+  }
+});
+
+function extrairLinks(texto) {
+  const urlRegex = /(https?:\/\/[^\s]+)/g;
+  return texto.match(urlRegex) || [];
+}
+function isURL(str) {
+  try {
+    const url = new URL(str);
+    return url.protocol === "http:" || url.protocol === "https:";
+  } catch {
+    return false;
+  }
+}
+
+// Toast simples confirmação
+function criarToast(msg) {
+  const toast = document.createElement("div");
+  toast.className = "toast";
+  toast.textContent = msg;
+  toastContainer.appendChild(toast);
+  setTimeout(() => {
+    toast.remove();
+  }, 4000);
+}
+
+// Atualiza estado do botão enviar com base nos inputs
+function atualizarBotaoEnviar() {
+  btnEnviarNotificacao.disabled =
+    notificacaoInput.value.trim() === "" || !categoriaSelect.value;
+}
+
+btnAbrirCriar.onclick = () => {
+  if (!usuarioAtual) {
+    criarToast("Usuário não autenticado!");
+    return;
+  }
+  overlayCriar.classList.add("active");
+  notificacaoInput.value = "";
+  telefoneInput.value = "";
+  categoriaSelect.value = "";
+  imagemFileInput.value = "";
+  atualizarBotaoEnviar();
+  carregarMinhasNotificacoes();
+};
+btnFecharCriar.onclick = () => overlayCriar.classList.remove("active");
+
+notificacaoInput.addEventListener("input", atualizarBotaoEnviar);
+categoriaSelect.addEventListener("change", atualizarBotaoEnviar);
+
+// Remove notificações > 2 dias (48h)
+async function removerNotificacoesAntigas(snapshot) {
+  const now = Date.now();
+  const doisDiasMs = 2 * 24 * 60 * 60 * 1000;
+  const updates = [];
+  snapshot.forEach((child) => {
+    const chave = child.key;
+    const dado = child.val();
+    if (dado.timestamp && now - dado.timestamp > doisDiasMs) {
+      updates.push(chave);
+    }
+  });
+  for (const chave of updates) {
+    try {
+      await remove(ref(db, `perfisUsuario/${usuarioAtual.uid}/notificacoes/${chave}`));
+    } catch (e) {
+      console.error("Erro removendo notificação antiga: ", e);
+    }
+  }
+}
+
+function carregarMinhasNotificacoes() {
+  if (!usuarioAtual) return;
+  if (ouvinteMinhasNotificacoes) {
+    ouvinteMinhasNotificacoes();
+    ouvinteMinhasNotificacoes = null;
+  }
+  minhasNotificacoesRef = ref(db, `perfisUsuario/${usuarioAtual.uid}/notificacoes`);
+  ouvinteMinhasNotificacoes = onValue(minhasNotificacoesRef, async (snapshot) => {
+    await removerNotificacoesAntigas(snapshot);
+
+    const val = snapshot.val();
+    minhasNotificacoesList.innerHTML = "";
+    if (!val) {
+      minhasNotificacoesList.innerHTML = "<p>Você não tem notificações criadas.</p>";
+      return;
+    }
+    Object.entries(val).forEach(([key, noti]) => {
+      const texto = noti.texto || "";
+      const telefone =
+        noti.telefone && noti.telefone.trim() !== ""
+          ? noti.telefone.trim()
+          : null;
+      const imagemUrl = noti.imagemUrl || "";
+      const categoria = noti.categoria || "";
+      const emailCriador = noti.emailCriador || "";
+      const timestamp = noti.timestamp || 0;
+
+      const p = document.createElement("p");
+      const spanText = document.createElement("span");
+      spanText.className = "texto";
+
+      const textoNode = document.createTextNode(texto);
+      spanText.appendChild(textoNode);
+
+      if (imagemUrl && isURL(imagemUrl)) {
+        const img = document.createElement("img");
+        img.src = imagemUrl;
+        img.alt = "Imagem da notificação";
+        img.tabIndex = 0;
+        img.setAttribute("role", "button");
+        img.setAttribute("aria-label", "Clique para ampliar imagem");
+        img.style.cursor = "pointer";
+
+        // Evento para ampliar imagem fullscreen
+        img.addEventListener("click", () => {
+          overlayImagemImg.src = imagemUrl;
+          overlayImagem.classList.add("active");
+          overlayImagem.focus();
+        });
+        img.addEventListener("keydown", (e) => {
+          if (e.key === "Enter" || e.key === " ") {
+            e.preventDefault();
+            overlayImagemImg.src = imagemUrl;
+            overlayImagem.classList.add("active");
+            overlayImagem.focus();
+          }
+        });
+
+        spanText.appendChild(img);
+      }
+
+      if (telefone) {
+        const botaoTel = document.createElement("a");
+        botaoTel.href = `tel:${telefone}`;
+        botaoTel.textContent = `Ligar: ${telefone}`;
+        botaoTel.className = "botaoTelefone";
+        botaoTel.setAttribute("aria-label", `Ligar para ${telefone}`);
+        spanText.appendChild(botaoTel);
+      }
+
+      const links = extrairLinks(texto);
+      links.forEach((url) => {
+        const botao = document.createElement("button");
+        botao.textContent = "Abrir link";
+        botao.className = "botaoLink";
+        botao.onclick = () => window.open(url, "_blank", "noopener");
+        spanText.appendChild(botao);
+      });
+
+      if (emailCriador) {
+        const emailSpan = document.createElement("div");
+        emailSpan.className = "email-criador";
+        emailSpan.textContent = `Postado por: ${emailCriador}`;
+        spanText.appendChild(emailSpan);
+      }
+
+      const tempoRestanteDiv = document.createElement("div");
+      tempoRestanteDiv.className = "tempo-restante";
+      tempoRestanteDiv.textContent = calcularTempoRestanteTxt(timestamp);
+      spanText.appendChild(tempoRestanteDiv);
+
+      p.appendChild(spanText);
+
+      const btnApagar = document.createElement("button");
+      btnApagar.textContent = "Apagar";
+      btnApagar.className = "apagarItem";
+      btnApagar.onclick = () => apagarNotificacao(key);
+
+      p.appendChild(btnApagar);
+
+      if (categoria) {
+        const badge = document.createElement("div");
+        badge.className = "badge-categoria";
+        badge.textContent = categoria;
+        p.appendChild(badge);
+      }
+
+      minhasNotificacoesList.appendChild(p);
+    });
+  }, (error) => {
+    minhasNotificacoesList.textContent = "Erro ao carregar suas notificações.";
+    console.error(error);
+  });
+}
+
+// Calcular tempo restante para expiração das notificações (2 dias)
+function calcularTempoRestanteTxt(timestamp) {
+  const doisDiasMs = 2 * 24 * 60 * 60 * 1000;
+  const now = Date.now();
+  const diff = Math.max(doisDiasMs - (now - timestamp), 0);
+
+  if (diff <= 0) return "Expirando em 0h";
+
+  const horas = Math.floor(diff / (1000 * 60 * 60));
+  const minutos = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
+
+  if(horas > 0){
+    return `Expira em ${horas}h${minutos > 0 ? " " + minutos + "min" : ""}`;
+  }
+  return `Expira em ${minutos}min`;
+}
+
+async function uploadImagemImgBB(file, apiKey) {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onload = async () => {
+      try {
+        const base64 = reader.result.split(",")[1];
+        const formData = new FormData();
+        formData.append("key", apiKey);
+        formData.append("image", base64);
+
+        const response = await fetch("https://api.imgbb.com/1/upload", {
+          method: "POST",
+          body: formData,
+        });
+        const data = await response.json();
+        if (data.success) {
+          resolve(data.data.url);
+        } else {
+          reject(new Error("Upload ImgBB falhou"));
+        }
+      } catch (e) {
+        reject(e);
+      }
+    };
+    reader.onerror = (error) => reject(error);
+    reader.readAsDataURL(file);
+  });
+}
+
+btnEnviarNotificacao.onclick = async () => {
+  if (!usuarioAtual) {
+    criarToast("Usuário não autenticado!");
+    return;
+  }
+  const texto = notificacaoInput.value.trim();
+  const telefoneInputStr = telefoneInput.value.trim().replace(/[^0-9+]/g, "");
+  const categoria = categoriaSelect.value || "";
+
+  if (!texto) {
+    criarToast("Por favor, digite a notificação.");
+    return;
+  }
+  if (!categoria) {
+    criarToast("Por favor, selecione uma categoria.");
+    return;
+  }
+  if (telefoneInputStr && !/^(\+?\d+)$/.test(telefoneInputStr)) {
+    criarToast("Número de telefone inválido.");
+    return;
+  }
+
+  let imagemUrl = "";
+  if (imagemFileInput.files.length > 0) {
+    try {
+      criarToast("Fazendo upload da imagem...");
+      imagemUrl = await uploadImagemImgBB(imagemFileInput.files[0], apiKeyImgBB);
+      criarToast("Upload de imagem concluído!");
+    } catch (e) {
+      criarToast("Erro no upload da imagem.");
+      return;
+    }
+  }
+
+  const novaNotificacao = {
+    texto,
+    telefone: telefoneInputStr || "",
+    imagemUrl,
+    categoria,
+    emailCriador: usuarioAtual.email || "",
+    timestamp: Date.now(),
+  };
+
+  try {
+    const notiRef = ref(db, `perfisUsuario/${usuarioAtual.uid}/notificacoes`);
+    await push(notiRef, novaNotificacao);
+    notificacaoInput.value = "";
+    telefoneInput.value = "";
+    categoriaSelect.value = "";
+    imagemFileInput.value = "";
+    atualizarBotaoEnviar();
+    criarToast("Notificação criada com sucesso!");
+  } catch (e) {
+    console.error("Erro criando notificação:", e);
+    criarToast("Erro ao criar notificação.");
+  }
+};
+
+async function apagarNotificacao(chave) {
+  if (!usuarioAtual || !chave) {
+    criarToast("Usuário não autenticado!");
+    return;
+  }
+  try {
+    const itemRef = ref(db, `perfisUsuario/${usuarioAtual.uid}/notificacoes/${chave}`);
+    await remove(itemRef);
+    criarToast("Notificação apagada.");
+  } catch (e) {
+    console.error("Erro apagando notificação:", e);
+    criarToast("Erro ao apagar notificação.");
+  }
+}
+
+btnApagarTodas.onclick = async () => {
+  if (!usuarioAtual) {
+    criarToast("Usuário não autenticado!");
+    return;
+  }
+  if (!confirm("Deseja apagar todas as suas notificações?")) return;
+  try {
+    const todasRef = ref(db, `perfisUsuario/${usuarioAtual.uid}/notificacoes`);
+    await remove(todasRef);
+    criarToast("Todas notificações apagadas.");
+  } catch (e) {
+    console.error("Erro apagando todas notificações:", e);
+    criarToast("Erro ao apagar notificações.");
+  }
+};
+
+const perfisRef = ref(db, "perfisUsuario");
+onValue(perfisRef, (snapshot) => {
+  const notificacoesGlobais = [];
+  snapshot.forEach((childSnap) => {
+    const perfil = childSnap.val();
+    if (perfil.notificacoes) {
+      Object.entries(perfil.notificacoes).forEach(([key, noti]) => {
+        const texto = noti.texto || "";
+        const telefone =
+          noti.telefone && noti.telefone.trim() !== "" ? noti.telefone.trim() : null;
+        const imagemUrl = noti.imagemUrl || "";
+        const categoria = noti.categoria || "";
+        const emailCriador = noti.emailCriador || "";
+        const timestamp = noti.timestamp || 0;
+
+        notificacoesGlobais.push({ texto, telefone, imagemUrl, categoria, emailCriador, timestamp });
+      });
+    }
+  });
+
+  notificacoesGlobaisList.innerHTML = "";
+  if (notificacoesGlobais.length === 0) {
+    notificacoesGlobaisList.innerHTML = "<p>Nenhuma notificação global disponível.</p>";
+  } else {
+    notificacoesGlobais.forEach(({ texto, telefone, imagemUrl, categoria, emailCriador, timestamp }) => {
+      const divNoti = document.createElement("div");
+      divNoti.className = "notificacao";
+
+      if (categoria) {
+        const badge = document.createElement("div");
+        badge.className = "badge-categoria";
+        badge.textContent = categoria;
+        divNoti.appendChild(badge);
+      }
+
+      const pTexto = document.createElement("p");
+      pTexto.className = "texto";
+      pTexto.textContent = texto;
+      divNoti.appendChild(pTexto);
+
+      if (imagemUrl && isURL(imagemUrl)) {
+        const img = document.createElement("img");
+        img.src = imagemUrl;
+        img.alt = "Imagem da notificação";
+
+        // Clique para ampliar em fullscreen
+        img.tabIndex = 0;
+        img.style.cursor = "pointer";
+        img.setAttribute("role", "button");
+        img.setAttribute("aria-label", "Clique para ampliar imagem");
+
+        img.addEventListener("click", () => {
+          overlayImagemImg.src = imagemUrl;
+          overlayImagem.classList.add("active");
+          overlayImagem.focus();
+        });
+        img.addEventListener("keydown", (e) => {
+          if (e.key === "Enter" || e.key === " ") {
+            e.preventDefault();
+            overlayImagemImg.src = imagemUrl;
+            overlayImagem.classList.add("active");
+            overlayImagem.focus();
+          }
+        });
+
+        divNoti.appendChild(img);
+      }
+
+      if (telefone) {
+        const botaoTel = document.createElement("a");
+        botaoTel.href = `tel:${telefone}`;
+        botaoTel.textContent = `Ligar: ${telefone}`;
+        botaoTel.className = "botaoTelefone";
+        botaoTel.setAttribute("aria-label", `Ligar para ${telefone}`);
+        divNoti.appendChild(botaoTel);
+      }
+
+      const links = extrairLinks(texto);
+      links.forEach((url) => {
+        const botao = document.createElement("button");
+        botao.textContent = "Abrir link";
+        botao.className = "botaoLink";
+        botao.onclick = () => window.open(url, "_blank", "noopener");
+        divNoti.appendChild(botao);
+      });
+
+      if (emailCriador) {
+        const emailSpan = document.createElement("div");
+        emailSpan.className = "email-criador";
+        emailSpan.textContent = `Enviada por: ${emailCriador}`;
+        divNoti.appendChild(emailSpan);
+      }
+
+      const tempoRestanteDiv = document.createElement("div");
+      tempoRestanteDiv.className = "tempo-restante";
+      tempoRestanteDiv.textContent = calcularTempoRestanteTxt(timestamp);
+      divNoti.appendChild(tempoRestanteDiv);
+
+      notificacoesGlobaisList.appendChild(divNoti);
+    });
+  }
+}, (error) => {
+  notificacoesGlobaisList.innerHTML = "<p>Erro ao carregar notificações.</p>";
+  console.error(error);
+});
+
+// Controle autenticação
+onAuthStateChanged(auth, (user) => {
+  usuarioAtual = user;
+  if (user) {
+    btnAbrirCriar.disabled = false;
+  } else {
+    btnAbrirCriar.disabled = true;
+    criarToast("Nenhum usuário autenticado! Faça login pelo seu app Firebase.");
+  }
+});
+</script>
+<script>
+  const overlay = document.getElementById('overlay10');
+  const openBtn = document.getElementById('openOverlayBtn');
+  const closeBtn = overlay.querySelector('.close-btn');
+
+  openBtn.addEventListener('click', () => {
+    overlay.style.display = 'flex';
+    document.body.style.overflow = 'hidden';
+  });
+
+  closeBtn.addEventListener('click', () => {
+    overlay.style.display = 'none';
+    document.body.style.overflow = '';
+  });
+</script>
+</body>
+</html>
+
+    </div>
+
+    <div id="intent-profile" class="intent-panel" aria-hidden="true">
+     <!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>App Perfil Movicel Isolado e Completo</title>
+<style>
+  /* Reset e tipografia */
+ 
+
+  /* Container específico do app - isolado */
+  .app-perfil-container {
+    width: 100%;
+    max-width: 600px;
+    background: white;
+    border-radius: 16px;
+    box-shadow: 0 8px 25px rgba(106, 63, 160, 0.27);
+    padding: 16px 20px 24px;
+    box-sizing: border-box;
+    margin-top: -60px;
+  }
+
+  .app-perfil-container {
+    font-size: 1.3rem;
+    margin-bottom: 0px;
+    text-align: center;
+    font-weight: 600;
+    color: transparent;
+    min-height: 44px;
+  }
+
+  /* Lista de perfis */
+  #lista-perfis {
+    display: grid;
+    grid-template-columns: repeat(auto-fill,minmax(180px, 1fr));
+    gap: 18px;
+    outline: none;
+  }
+
+  .perfil-card {
+    background: #f7f0ff;
+    border-radius: 14px;
+    padding: 14px;
+    cursor: pointer;
+    box-shadow: 0 3px 12px rgba(106,63,160,0.18);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    transition: box-shadow 0.3s ease, background-color 0.3s ease;
+    user-select: none;
+  }
+  .perfil-card:hover, .perfil-card:focus {
+    box-shadow: 0 8px 20px rgba(106,63,160,0.4);
+    outline: none;
+    background: #e8d9fc;
+  }
+
+  .perfil-card img {
+    width: 100px;
+    height: 100px;
+    border-radius: 50%;
+    object-fit: cover;
+    margin-bottom: 14px;
+    box-shadow: 0 4px 14px rgba(106,63,160,0.4);
+    background-color: #7e52a3;
+    transition: transform 0.3s ease;
+  }
+  .perfil-card:hover img, .perfil-card:focus img {
+    transform: scale(1.05);
+  }
+
+  .perfil-nome {
+    font-weight: 700;
+    margin-bottom: 8px;
+    color: #4b227d;
+    text-align: center;
+    font-size: 1.2rem;
+    word-break: break-word;
+    min-height: 30px;
+  }
+  .perfil-sobre {
+    font-size: 0.92rem;
+    color: #6b5090;
+    text-align: center;
+    min-height: 48px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    display: -webkit-box;
+    -webkit-line-clamp: 3; /* limita a 3 linhas */
+    -webkit-box-orient: vertical;
+    line-height: 1.3rem;
+  }
+
+  .perfil-habilidades {
+    font-style: italic;
+    color: #6b5090;
+    font-size: 0.9rem;
+    margin-top: 8px;
+    text-align: center;
+  }
+
+  .perfil-redes {
+    margin-top: 8px;
+    text-align: center;
+    display: flex;
+    justify-content: center;
+    gap: 12px;
+    flex-wrap: wrap;
+  }
+  .perfil-redes a.social-link {
+    color: #6a3fa0;
+    font-weight: 600;
+    text-decoration: none;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 36px;
+    height: 36px;
+    border-radius: 6px;
+    background: #ede4fc;
+    box-shadow: 0 1px 4px rgba(106, 63, 160, 0.2);
+    transition: background-color 0.3s ease;
+  }
+  .perfil-redes a.social-link:hover,
+  .perfil-redes a.social-link:focus {
+    background-color: #6a3fa0;
+    color: white;
+    outline: none;
+  }
+  .perfil-redes a.social-link svg {
+    width: 20px;
+    height: 20px;
+    fill: currentColor;
+  }
+
+  /* Botão para criar/editar perfil fixo */
+  #btn-editar-perfil {
+    position: fixed;
+    bottom: 20px;
+    right: 20px;
+    background: #6a3fa0;
+    border: none;
+    border-radius: 50%;
+    width: 56px;
+    height: 56px;
+    color: white;
+    font-size: 30px;
+    font-weight: 700;
+    box-shadow: 0 4px 15px rgba(106, 63, 160, 0.6);
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+    user-select: none;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 50;
+  }
+  #btn-editar-perfil:hover, #btn-editar-perfil:focus {
+    background: #884fd1;
+    outline: none;
+  }
+
+  /* Modal Overlay - exclusivo */
+  .modal-perfil-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(90, 42, 130, 0.85);
+    display: none;
+    justify-content: center;
+    align-items: center;
+    z-index: 1000;
+    padding: 12px;
+  }
+  .modal-perfil-overlay.active {
+    display: flex;
+  }
+
+  .modal-perfil {
+    background: #fff;
+    border-radius: 20px;
+    width: 100%;
+    max-width: 520px;
+    max-height: 90vh;
+    overflow-y: auto;
+    padding: 2px 24px 3px;
+    box-sizing: border-box;
+    color: #3a1153;
+    box-shadow: 0 8px 28px rgba(90,42,130,0.6);
+    position: relative;
+    font-size: 1rem;
+  }
+
+  .modal-perfil h2 {
+    font-weight: 700;
+    color: #6a3fa0;
+    margin-bottom: 22px;
+    font-size: 1.7rem;
+    text-align: center;
+    user-select: none;
+  }
+
+  .campo-form {
+    margin-bottom: 20px;
+    width: 98%;
+  }
+
+  .campo-form label {
+    display: block;
+    font-weight: 600;
+    margin-bottom: 8px;
+    color: #4b227d;
+    user-select: none;
+  }
+
+  .campo-form input[type="text"],
+  .campo-form textarea {
+    width: 100%;
+    padding: 12px 14px;
+    border: 2px solid #b695e5;
+    border-radius: 12px;
+    font-size: 1rem;
+    resize: vertical;
+    transition: border-color 0.3s ease;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  }
+  .campo-form input[type="text"]:focus,
+  .campo-form textarea:focus {
+    border-color: #6a3fa0;
+    outline: none;
+  }
+
+  /* Foto perfil preview dentro o form */
+  #preview-foto {
+    display: block;
+    margin: 0 auto 16px;
+    width: 100px;
+    height: 100px;
+    border-radius: 50%;
+    object-fit: cover;
+    box-shadow: 0 5px 18px rgba(106,63,160,0.55);
+    background-color: #dcd0f0;
+    transition: box-shadow 0.3s ease;
+  }
+  #preview-foto:hover {
+    box-shadow: 0 8px 26px rgba(106,63,160,0.8);
+  }
+
+  /* Botões na modal */
+  .btn-group {
+    display: flex;
+    justify-content: space-between;
+    gap: 14px;
+  }
+  button.modal-btn {
+    flex: 1;
+    padding: 16px;
+    border: none;
+    border-radius: 12px;
+    font-weight: 700;
+    font-size: 1.15rem;
+    cursor: pointer;
+    user-select: none;
+    transition: background-color 0.3s ease;
+  }
+  button.btn-cancelar {
+    background: #c3a1f2;
+    color: #4a2e82;
+    box-shadow: 0 4px 8px rgba(125, 82, 190, 0.6);
+  }
+  button.btn-cancelar:hover, button.btn-cancelar:focus {
+    background: #a77ee1;
+    outline: none;
+  }
+  button.btn-salvar {
+    background: #6a3fa0;
+    color: white;
+    box-shadow: 0 4px 12px rgba(106, 63, 160, 0.85);
+  }
+  button.btn-salvar:hover, button.btn-salvar:focus {
+    background: #844fc6;
+    outline: none;
+  }
+
+  /* Pequenos detalhes */
+  .modal-perfil small {
+    display: block;
+    margin-top: -18px;
+    margin-bottom: 14px;
+    font-size: 0.85rem;
+    color: #7d66aa;
+    font-style: italic;
+    text-align: center;
+    user-select: none;
+  }
+
+  a.social-link {
+    color: #6a3fa0;
+    text-decoration: none;
+  }
+  a.social-link:hover, a.social-link:focus {
+    text-decoration: underline;
+    outline: none;
+  }
+
+  /* Scrollbar fina e discreta */
+  .modal-perfil::-webkit-scrollbar {
+    width: 7px;
+  }
+  .modal-perfil::-webkit-scrollbar-thumb {
+    background-color: #b695e5;
+    border-radius: 3px;
+  }
+
+  /* Toast Container */
+  #toast-container {
+    position: fixed;
+    bottom: 20px;
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: 2000;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    max-width: 320px;
+    width: 90vw;
+    pointer-events: none;
+  }
+
+  .toast {
+    background-color: #6a3fa0;
+    color: white;
+    padding: 14px 20px;
+    border-radius: 12px;
+    box-shadow: 0 3px 15px rgba(106,63,160,0.65);
+    font-weight: 600;
+    letter-spacing: 0.02em;
+    font-size: 1rem;
+    opacity: 0;
+    transform: translateY(20px);
+    pointer-events: auto;
+    animation: slideIn 0.4s forwards, fadeOut 0.4s forwards 3.6s;
+    user-select: none;
+  }
+
+  @keyframes slideIn {
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+  @keyframes fadeOut {
+    to {
+      opacity: 0;
+      transform: translateY(-20px);
+    }
+  }
+</style>
+</head>
+<body>
+
+
+<div class="app-perfil-container" role="main" aria-label="Aplicativo de perfil">
+  <div class="welcome" id="welcome1-message">Carregando usuário...</div>
+
+  <div id="lista-perfis" tabindex="0" aria-label="Lista dos perfis criados">
+    <!-- Perfis carregados aqui via JS -->
+  </div>
+</div>
+
+<button id="btn-editar-perfil" aria-label="Criar ou editar meu perfil" title="Criar/Editar Perfil">✎</button>
+
+<!-- Modal Overlay com classe exclusiva -->
+<div class="modal-perfil-overlay" id="modal-editar-perfil" role="dialog" aria-modal="true" aria-labelledby="titulo-formulario-perfil" tabindex="-1">
+  <div class="modal-perfil" role="document">
+    <h2 id="titulo-formulario-perfil">Criar / Editar Perfil</h2>
+    <form id="form-perfil" novalidate autocomplete="off">
+      <div class="campo-form">
+        <label for="inputNome">Nome</label>
+        <input type="text" id="inputNome" name="nome" maxlength="50" required />
+      </div>
+
+      <div class="campo-form">
+        <label for="inputFoto">Foto do Perfil (Enviar imagem)</label>
+        <input type="file" id="inputFoto" name="foto" accept="image/*" />
+        <img id="preview-foto" alt="Preview da foto do perfil" src="" aria-live="polite" />
+      </div>
+
+      <div class="campo-form">
+        <label for="inputSobre">Sobre você</label>
+        <textarea id="inputSobre" name="sobre" rows="3" maxlength="300" placeholder="Conte um pouco sobre você..."></textarea>
+      </div>
+
+      <div class="campo-form">
+        <label for="inputHabilidades">Habilidades ou o que sabe fazer</label>
+        <textarea id="inputHabilidades" name="habilidades" rows="3" maxlength="300" placeholder="Ex: Programação, Design, Marketing, etc."></textarea>
+      </div>
+
+      <div class="campo-form">
+        <label for="inputRedes">Redes Sociais (URLs separadas por vírgula, tel para telefone ex: tel:+244991234567)</label>
+        <input type="text" id="inputRedes" name="redes" placeholder="Ex: https://facebook.com/usuario, tel:+244991234567, https://instagram.com/usuario" />
+      </div>
+
+      <small>Após salvar, espere alguns segundos para a atualização na lista.</small>
+
+      <div class="btn-group">
+        <button type="button" class="modal-btn btn-cancelar" id="btnCancelarEditar">Cancelar</button>
+        <button type="submit" class="modal-btn btn-salvar" id="btnSalvarPerfil">Salvar</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<!-- Toast Container -->
+<div id="toast-container" role="region" aria-live="polite" aria-atomic="true"></div>
+
+<script type="module">
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/12.1.0/firebase-app.js";
+  import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/12.1.0/firebase-auth.js";
+  import { getDatabase, ref, set, get, child, onValue } from "https://www.gstatic.com/firebasejs/12.1.0/firebase-database.js";
+
+  const firebaseConfig = {
+    apiKey: "AIzaSyCE_vGty5XsV1YqdCi49Ck2xJDSFq284wc",
+    authDomain: "cliente-movicel.firebaseapp.com",
+    databaseURL: "https://cliente-movicel-default-rtdb.firebaseio.com",
+    projectId: "cliente-movicel",
+    storageBucket: "cliente-movicel.firebasestorage.app",
+    messagingSenderId: "215414688375",
+    appId: "1:215414688375:web:2c7d20a0c03c4c0fcfd472",
+    measurementId: "G-7F1RGP9GHV"
+  };
+
+  const apiKeyImgBB = 'e073e02267a1f0259cd69c562e780659';
+
+  // Inicializa Firebase
+  const app = initializeApp(firebaseConfig);
+  const auth = getAuth();
+  const db = getDatabase(app);
+
+  // DOM Elements
+  const welcomeMessage = document.getElementById('welcome1-message');
+  const listaPerfis = document.getElementById('lista-perfis');
+
+  const btnEditarPerfil = document.getElementById('btn-editar-perfil');
+  const modalOverlay = document.getElementById('modal-editar-perfil');
+  const formPerfil = document.getElementById('form-perfil');
+
+  const inputNome = document.getElementById('inputNome');
+  const inputFoto = document.getElementById('inputFoto');
+  const inputSobre = document.getElementById('inputSobre');
+  const inputHabilidades = document.getElementById('inputHabilidades');
+  const inputRedes = document.getElementById('inputRedes');
+  const previewFoto = document.getElementById('preview-foto');
+
+  const toastContainer = document.getElementById('toast-container');
+
+  let currentUserUid = null;
+  let currentFotoURL = '';
+
+  // Função toast
+  function showToast(msg, duration = 4000) {
+    const toast = document.createElement('div');
+    toast.className = 'toast';
+    toast.textContent = msg;
+    toastContainer.appendChild(toast);
+    setTimeout(() => {
+      toast.style.opacity = '0';
+      toast.style.transform = 'translateY(-20px)';
+      setTimeout(() => toast.remove(), 400);
+    }, duration);
+  }
+
+  // Limpar a lista
+  function limparLista() {
+    while(listaPerfis.firstChild){
+      listaPerfis.removeChild(listaPerfis.firstChild);
+    }
+  }
+
+  // Abre modal preenchendo dados se existir
+  async function abrirModalEditar() {
+    if (!currentUserUid) {
+      alert('Usuário não autenticado.');
+      return;
+    }
+
+    previewFoto.src = '';
+    currentFotoURL = '';
+
+    inputNome.value = '';
+    inputSobre.value = '';
+    inputHabilidades.value = '';
+    inputRedes.value = '';
+    inputFoto.value = '';
+
+    try {
+      const perfilSnap = await get(child(ref(db), `perfisUsuario/${currentUserUid}`));
+      if (perfilSnap.exists()) {
+        const p = perfilSnap.val();
+        inputNome.value = p.nome || '';
+        inputSobre.value = p.sobre || '';
+        inputHabilidades.value = p.habilidades || '';
+        inputRedes.value = p.redes || '';
+        if (p.fotoURL) {
+          currentFotoURL = p.fotoURL;
+          previewFoto.src = currentFotoURL;
+        }
+      }
+    } catch (err) {
+      console.error('Erro ao carregar perfil:', err);
+      showToast('Erro ao carregar seu perfil.');
+    }
+
+    modalOverlay.classList.add('active');
+    modalOverlay.focus();
+  }
+
+  // Fecha modal edição
+  function fecharModalEditar() {
+    modalOverlay.classList.remove('active');
+    previewFoto.src = '';
+    inputFoto.value = '';
+  }
+
+  // Upload imagem para ImgBB com toast
+  async function uploadImagemImgBB(file){
+    if(!file) return null;
+    const formData = new FormData();
+    formData.append('image', file);
+    const url = `https://api.imgbb.com/1/upload?key=${apiKeyImgBB}`;
+    try {
+      const response = await fetch(url,{
+        method:'POST',
+        body: formData
+      });
+      const data = await response.json();
+      if(data.success) {
+        showToast('Imagem carregada com sucesso!');
+        return data.data.url;
+      } else {
+        showToast('Erro no upload da imagem: ' + (data.error?.message || 'Desconhecido'));
+        return null;
+      }
+    } catch(e){
+      showToast('Falha na comunicação com a API de imagens.');
+      console.error(e);
+      return null;
+    }
+  }
+
+  // Preview imagem selecionada
+  inputFoto.addEventListener('change', () => {
+    if(inputFoto.files && inputFoto.files[0]){
+      const file = inputFoto.files[0];
+      previewFoto.src = URL.createObjectURL(file);
+    } else {
+      previewFoto.src = currentFotoURL || '';
+    }
+  });
+
+  // Salvar perfil
+  formPerfil.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    if(!currentUserUid){
+      alert('Erro: Usuário não autenticado.');
+      return;
+    }
+    const nome = inputNome.value.trim();
+    if(!nome){
+      alert('Por favor, preencha seu nome.');
+      inputNome.focus();
+      return;
+    }
+
+    let fotoURL = currentFotoURL || '';
+    if(inputFoto.files && inputFoto.files[0]){
+      fotoURL = await uploadImagemImgBB(inputFoto.files[0]);
+      if(!fotoURL) return; // Para se upload falhar
+    }
+
+    const sobre = inputSobre.value.trim();
+    const habilidades = inputHabilidades.value.trim();
+    const redes = inputRedes.value.trim();
+
+    const perfilData = { nome, fotoURL, sobre, habilidades, redes };
+
+    try {
+      await set(ref(db, `perfisUsuario/${currentUserUid}`), perfilData);
+      showToast('Perfil salvo com sucesso!');
+      fecharModalEditar();
+    } catch(err){
+      console.error(err);
+      alert('Erro ao salvar perfil.');
+    }
+  });
+
+  // Função para abreviar URLs e telefone
+  function abreviarURL(url){
+    try {
+      if(url.startsWith('tel:')){
+        return url.replace('tel:', '').replace(/\+/g, '').trim();
+      }
+      let parsed = new URL(url);
+      let hostname = parsed.hostname.replace('www.', '');
+      let pathname = parsed.pathname.replace(/\/$/, '');
+      return hostname + pathname;
+    } catch {
+      return url;
+    }
+  }
+
+  // Ícones sociais em SVG inline
+  function iconSocialSVG(type){
+    switch(type){
+      case 'facebook': return `<svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true" focusable="false" width="20" height="20"><path d="M22 12a10 10 0 1 0-11.5 9.85v-6.95H8v-2.9h2.5v-2.2c0-2.5 1.49-3.9 3.78-3.9 1.1 0 2.25.2 2.25.2v2.47h-1.26c-1.24 0-1.63.77-1.63 1.56v1.88h2.78l-.44 2.9h-2.34v6.95A10 10 0 0 0 22 12"></path></svg>`;
+      case 'youtube': return `<svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true" focusable="false" width="20" height="20"><path d="M10 15l5.19-3L10 9v6zm12-3c0-1.7-.14-3.08-.42-4.24a4.68 4.68 0 0 0-2-2.9 8.36 8.36 0 0 0-5.81-1H9c-1.32.09-2.68.31-4 .59-1.04.24-2.03.62-2.87 1A4.5 4.5 0 0 0 1 9a7.44 7.44 0 0 0-.42 5c.25 1.46.7 2.9 1.5 4 .78 1.1 1.67 1.74 2.68 2.29a12.94 12.94 0 0 0 4.5 1.08 30 30 0 0 0 3.86-.52 5.57 5.57 0 0 0 3.5-3.5c.2-.56.57-1.34.65-2 .24-1.58.34-2.9.34-4z"></path></svg>`;
+      case 'instagram': return `<svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true" focusable="false" width="20" height="20"><path d="M7 2c-1 0-1.75 0-2.3.06-1.89.13-3.4 1.7-3.4 3.6C1.22 6.48 1 8.42 1 11v2c0 2.56.22 4.5.36 5.31.06.25.12.48.18.69a4.43 4.43 0 0 0 1.02 1.91c.5.6 1.17.96 1.89 1.12C6.25 21.94 7 22 8.68 22H15c1.53 0 2.31 0 3.02-.08a4.36 4.36 0 0 0 2.81-1.72c.23-.28.38-.56.46-.85.15-.54.23-1.65.23-3.72 0-2.06-.07-2.69-.53-4-.2-.55-.51-1.1-.85-1.7a10.34 10.34 0 0 0-1.54-2.05c-.62-.63-1.15-1-1.7-1.3-.32-.16-.4-.2-.81-.28C17.47 6.1 16.36 6 14.03 6H10c-1.3 0-1.95 0-3 .05zm3 2h4c1.6 0 1.91 0 2.26.11.81.27 1.48.81 2.06 1.39a5.25 5.25 0 0 1 1.39 2.06c.11.35.11.65.11 2.26a24.73 24.73 0 0 1 0 4c0 1.6 0 1.91-.11 2.26a5.25 5.25 0 0 1-1.39 2.06 4.72 4.72 0 0 1-2.06 1.39c-.35.11-.65.11-2.26.11h-4c-1.6 0-1.91 0-2.26-.11a5.21 5.21 0 0 1-2.05-1.39 5.25 5.25 0 0 1-1.39-2.05c-.11-.35-.11-.65-.11-2.26v-4c0-1.6 0-1.91.11-2.26a5.15 5.15 0 0 1 1.39-2.05 5.25 5.25 0 0 1 2.05-1.39C8.09 4 8.4 4 10 4z"></path></svg>`;
+      case 'tiktok': return `<svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true" focusable="false" width="20" height="20"><path d="M9.57 3c.1.42 3.67 0 4.5 0v6.11a4.04 4.04 0 0 1-2.34-1.67 3.64 3.64 0 0 0-2.16-1.37A6.19 6.19 0 0 0 8 6.34l1.57-3.36zM17 7v2.5h3v4h-3v5.5a4.5 4.5 0 1 1-4.5-4.5c.02 0 .04 0 .06.01V7h1.44z"></path></svg>`;
+      case 'phone': return `<svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true" focusable="false" width="20" height="20"><path d="M6.6 10.79a15.51 15.51 0 0 0 6.58 6.58l2.2-2.2a1 1 0 0 1 1.08-.21 11.36 11.36 0 0 0 3.58.57 1 1 0 0 1 1 1v3.58a1 1 0 0 1-1 1A17 17 0 0 1 3 5a1 1 0 0 1 1-1h3.57a1 1 0 0 1 1 1 11.36 11.36 0 0 0 .58 3.57 1 1 0 0 1-.2 1.09l-2.3 2.55z"/></svg>`;
+      default: return '';
+    }
+  }
+
+  // Renderização dos perfis
+  function carregarPerfis(){
+    limparLista();
+    try {
+      const perfisRef = ref(db, 'perfisUsuario');
+      onValue(perfisRef, snapshot => {
+        const perfis = snapshot.val();
+        limparLista();
+        if (!perfis) {
+          listaPerfis.textContent = "Nenhum perfil cadastrado ainda.";
+          return;
+        }
+
+        Object.entries(perfis).forEach(([uid, perfil]) => {
+          if (!perfil || !perfil.nome || perfil.nome.trim() === '') return;
+
+          const card = document.createElement('div');
+          card.className = 'perfil-card';
+          card.tabIndex = 0;
+          card.setAttribute('role', 'button');
+          card.setAttribute('aria-label', `Perfil de ${perfil.nome}`);
+
+          // Foto
+          const img = document.createElement('img');
+          img.alt = `Foto do perfil de ${perfil.nome}`;
+          img.src = perfil.fotoURL || 'https://via.placeholder.com/100x100?text=Foto';
+          card.appendChild(img);
+
+          // Nome
+          const nome = document.createElement('div');
+          nome.className = 'perfil-nome';
+          nome.textContent = perfil.nome;
+          card.appendChild(nome);
+
+          // Sobre
+          const sobre = document.createElement('div');
+          sobre.className = 'perfil-sobre';
+          let txtSobre = perfil.sobre || '';
+          if (txtSobre.length > 80) txtSobre = txtSobre.slice(0, 77) + '...';
+          sobre.textContent = txtSobre || 'Sem descrição.';
+          card.appendChild(sobre);
+
+          // Habilidades
+          if (perfil.habilidades && perfil.habilidades.trim() !== '') {
+            const habDiv = document.createElement('div');
+            habDiv.className = 'perfil-habilidades';
+            habDiv.textContent = 'Habilidades: ' + perfil.habilidades;
+            card.appendChild(habDiv);
+          }
+
+          // Redes sociais
+          const redesDiv = document.createElement('div');
+          redesDiv.className = 'perfil-redes';
+
+          const rawRedes = perfil.redes || '';
+          const links = rawRedes.split(',').map(s => s.trim()).filter(s => s.length > 0);
+
+          const redesDetectadas = {};
+          links.forEach(link => {
+            let linkLC = link.toLowerCase();
+
+            if(linkLC.startsWith('tel:')) redesDetectadas.phone = link;
+            else if(linkLC.includes('facebook.com')) redesDetectadas.facebook = link;
+            else if(linkLC.includes('youtube.com') || linkLC.includes('youtu.be')) redesDetectadas.youtube = link;
+            else if(linkLC.includes('instagram.com')) redesDetectadas.instagram = link;
+            else if(linkLC.includes('tiktok.com')) redesDetectadas.tiktok = link;
+          });
+
+          Object.entries(redesDetectadas).forEach(([rede, url]) => {
+            const a = document.createElement('a');
+            a.href = url;
+            a.target = '_blank';
+            a.rel = 'noopener noreferrer';
+            a.className = 'social-link';
+            a.setAttribute('aria-label', rede.charAt(0).toUpperCase() + rede.slice(1));
+            a.title = rede.charAt(0).toUpperCase() + rede.slice(1);
+            a.innerHTML = iconSocialSVG(rede);
+            redesDiv.appendChild(a);
+          });
+
+          if(redesDiv.childNodes.length > 0) card.appendChild(redesDiv);
+
+          // Somente dono editará perfil ao clicar
+          card.addEventListener('click', () => {
+            if(uid === currentUserUid) abrirModalEditar();
+          });
+          card.addEventListener('keydown', e => {
+            if ((e.key === 'Enter' || e.key === ' ') && uid === currentUserUid) {
+              e.preventDefault();
+              abrirModalEditar();
+            }
+          });
+
+          listaPerfis.appendChild(card);
+        });
+      });
+    } catch(err){
+      listaPerfis.textContent = 'Erro ao carregar perfis.';
+      console.error(err);
+    }
+  }
+
+  // Eventos e funções modal
+  btnEditarPerfil.addEventListener('click', abrirModalEditar);
+  modalOverlay.addEventListener('click', e => {
+    if(e.target === modalOverlay) fecharModalEditar();
+  });
+  modalOverlay.addEventListener('keydown', e => {
+    if(e.key === 'Escape') fecharModalEditar();
+  });
+  document.getElementById('btnCancelarEditar').addEventListener('click', fecharModalEditar);
+
+  // Detectar login Firebase e carregar perfis
+  onAuthStateChanged(auth, user => {
+    if(user){
+      currentUserUid = user.uid;
+      let nomeExibir =
+        user.displayName && user.displayName.trim() !== '' ? user.displayName :
+        user.email && user.email.trim() !== '' ? user.email :
+        'Usuário';
+      welcomeMessage.textContent = `Olá, ${nomeExibir}!`;
+      carregarPerfis();
+    } else {
+      currentUserUid = null;
+      welcomeMessage.textContent = 'Você não está autenticado. Por favor, faça login.';
+      limparLista();
+    }
+  });
+
+  // Salvar perfil - cuidando do upload ImgBB
+  formPerfil.addEventListener('submit', async e => {
+    e.preventDefault();
+    if(!currentUserUid){
+      alert('Erro: Usuário não autenticado.');
+      return;
+    }
+    const nome = inputNome.value.trim();
+    if(!nome){
+      alert('Por favor, preencha seu nome.');
+      inputNome.focus();
+      return;
+    }
+    let fotoURL = currentFotoURL || '';
+    if(inputFoto.files && inputFoto.files[0]){
+      fotoURL = await uploadImagemImgBB(inputFoto.files[0]);
+      if(!fotoURL) return;
+    }
+    const sobre = inputSobre.value.trim();
+    const habilidades = inputHabilidades.value.trim();
+    const redes = inputRedes.value.trim();
+
+    const perfilData = {nome,fotoURL,sobre,habilidades,redes};
+    try{
+      await set(ref(db, `perfisUsuario/${currentUserUid}`), perfilData);
+      showToast('Perfil salvo com sucesso!');
+      fecharModalEditar();
+    }catch(err){
+      console.error(err);
+      alert('Erro ao salvar perfil.');
+    }
+  });
+</script>
+</body>
+</html>
+  </div>
+
+    <div id="intent-settings" class="intent-panel" aria-hidden="true">
+      <!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Perfil Movicel com Firebase</title>
+  <style>
+    /* Reset básico */
+  
+    main1 {
+      background: white;
+      border-radius: 16px yellow;
+      width: 100%;
+      max-width: 400px;
+      box-shadow: 0 8px 20px rgba(0,0,0,0.2);
+      text-align: center;
+      color: #3a2a45;
+    }
+    .welcome {
+      font-size: 1.3rem;
+      margin-top: 34px;
+      min-height: 48px;
+      font-weight: 600;
+    }
+    .btn-list {
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+      margin-bottom: 12px;
+    }
+    button.action-btn {
+      margin-bottom: 12px;
+      width: 90%;
+      font-size: 1.1rem;
+      font-weight: 600;
+      cursor: pointer;
+      background: #5c2a81;
+      border: none;
+      color: white;
+      padding: 14px 18px;
+      border-radius: 10px;
+      transition: background-color 0.3s ease;
+      box-shadow: 0 3px 6px rgba(92, 42, 129, 0.5);
+    }
+    button.action-btn:hover,
+    button.action-btn:focus {
+      background-color: #7c4bbe;
+      outline: none;
+    }
+    button.logout-btn {
+      background: #ff6600;
+      box-shadow: 0 3px 6px rgba(255, 102, 0, 0.7);
+    }
+    button.logout-btn:hover,
+    button.logout-btn:focus {
+      background: #ff8633;
+      outline: none;
+    }
+    /* Modal overlay */
+    .modal-overlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,0.6);
+      display: none;
+      justify-content: center;
+      align-items: center;
+      z-index: 9999;
+      padding: 12px;
+    }
+    .modal-overlay.active {
+      display: flex;
+    }
+    .modal-content {
+      background: white;
+      padding: 24px 20px;
+      border-radius: 16px;
+      max-width: 360px;
+      width: 100%;
+      box-shadow: 0 6px 18px rgba(92, 42, 129, 0.4);
+      box-sizing: border-box;
+      text-align: left;
+      color: #3a2a45;
+      position: relative;
+    }
+    .modal-content h3 {
+      margin-bottom: 16px;
+      font-weight: 700;
+      color: #5c2a81;
+      font-size: 1.4rem;
+      user-select: none;
+    }
+    .modal-content label {
+      display: block;
+      margin-bottom: 8px;
+      font-weight: 600;
+      font-size: 1rem;
+    }
+    .modal-content input[type="tel"],
+    .modal-content input[type="number"] {
+      width: 100%;
+      padding: 10px 12px;
+      margin-bottom: 16px;
+      border: 2px solid #ccc;
+      border-radius: 8px;
+      font-size: 1.1rem;
+      transition: border-color 0.3s ease;
+    }
+    .modal-content input[type="tel"]:focus,
+    .modal-content input[type="number"]:focus {
+      border-color: #5c2a81;
+      outline: none;
+    }
+    .modal-content .btn-group {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 12px;
+    }
+    .modal-content .btn-group button {
+      flex: 1;
+      padding: 12px;
+      border-radius: 10px;
+      font-weight: 700;
+      font-size: 1.1rem;
+      cursor: pointer;
+      border: none;
+      transition: background-color 0.3s ease;
+      user-select: none;
+    }
+    .modal-content .btn-group button.call-btn {
+      background: #5c2a81;
+      color: white;
+      box-shadow: 0 3px 6px rgba(92, 42, 129, 0.6);
+    }
+    .modal-content .btn-group button.call-btn:hover {
+      background: #7c4bbe;
+    }
+    .modal-content .btn-group button.cancel-btn {
+      background: #ccc;
+      color: #333;
+    }
+    .modal-content .btn-group button.cancel-btn:hover {
+      background: #999;
+    }
+  </style>
+</head>
+<body>
+<main1>
+  <div class="welcome" id="welcome-message">
+    Detectando usuário...
+  </div>
+  <a href="#" id="btn-desativar"></a>
+  <a href="#" id="btn-pedir-adianta"></a>
+  <div class="btn-list">
+    <center>
+      <button class="action-btn" onclick="window.location.href='recarga.html'">Desativar Planos</button>
+    <button class="action-btn"  onclick="window.location.href='tel:*205*200%23'">Pedir Adianta</button>
+    <button class="action-btn" id="btn-liga-so">Mandar Liga Só</button>
+    <button class="action-btn" id="btn-enviar-saldo">Enviar Saldo</button>
+    <button class="action-btn logout-btn" id="btn-logout">Terminar Sessão</button>
+      </center>
+  </div>
+</main1>
+
+<!-- Modal Liga Só -->
+<div class="modal-overlay" id="modal-liga-so" role="dialog" aria-modal="true" aria-labelledby="modal-liga-so-title" tabindex="-1">
+  <div class="modal-content">
+    <h3 id="modal-liga-so-title">Mandar Liga Só</h3>
+    <label for="liga-so-numero">Número para ligar:</label>
+    <input type="tel" id="liga-so-numero" placeholder="Ex: 991234567" pattern="[0-9]+" inputmode="tel" autocomplete="tel"/>
+    <div class="btn-group">
+      <button class="call-btn" id="call-liga-so">Ligar</button>
+      <button class="cancel-btn" id="cancel-liga-so">Cancelar</button>
+    </div>
+  </div>
+</div>
+
+<!-- Modal Enviar Saldo -->
+<div class="modal-overlay" id="modal-enviar-saldo" role="dialog" aria-modal="true" aria-labelledby="modal-enviar-saldo-title" tabindex="-1">
+  <div class="modal-content">
+    <h3 id="modal-enviar-saldo-title">Enviar Saldo</h3>
+    <label for="enviar-saldo-numero">Número para enviar saldo:</label>
+    <input type="tel" id="enviar-saldo-numero" placeholder="Ex: 991234567" pattern="[0-9]+" inputmode="tel" autocomplete="tel"/>
+    <label for="enviar-saldo-valor">Valor a enviar (MT):</label>
+    <input type="number" id="enviar-saldo-valor" min="1" step="1" placeholder="Ex: 50" />
+    <div class="btn-group">
+      <button class="call-btn" id="call-enviar-saldo">Enviar</button>
+      <button class="cancel-btn" id="cancel-enviar-saldo">Cancelar</button>
+    </div>
+  </div>
+</div>
+
+<script type="module">
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/12.1.0/firebase-app.js";
+  import { getAnalytics } from "https://www.gstatic.com/firebasejs/12.1.0/firebase-analytics.js";
+  import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/12.1.0/firebase-auth.js";
+
+  const firebaseConfig = {
+    apiKey: "AIzaSyCE_vGty5XsV1YqdCi49Ck2xJDSFq284wc",
+    authDomain: "cliente-movicel.firebaseapp.com",
+    databaseURL: "https://cliente-movicel-default-rtdb.firebaseio.com",
+    projectId: "cliente-movicel",
+    storageBucket: "cliente-movicel.firebasestorage.app",
+    messagingSenderId: "215414688375",
+    appId: "1:215414688375:web:2c7d20a0c03c4c0fcfd472",
+    measurementId: "G-7F1RGP9GHV"
+  };
+
+  const app = initializeApp(firebaseConfig);
+  getAnalytics(app);
+  const auth = getAuth();
+
+  const welcomeMessage = document.getElementById('welcome-message');
+  const btnDesativar = document.getElementById('btn-desativar');
+  const btnPedirAdianta = document.getElementById('btn-pedir-adianta');
+  const btnLigaSo = document.getElementById('btn-liga-so');
+  const btnEnviarSaldo = document.getElementById('btn-enviar-saldo');
+  const btnLogout = document.getElementById('btn-logout');
+
+  const modalLigaSo = document.getElementById('modal-liga-so');
+  const inputLigaSo = document.getElementById('liga-so-numero');
+  const callLigaSo = document.getElementById('call-liga-so');
+  const cancelLigaSo = document.getElementById('cancel-liga-so');
+
+  const modalEnviarSaldo = document.getElementById('modal-enviar-saldo');
+  const inputEnviarNumero = document.getElementById('enviar-saldo-numero');
+  const inputEnviarValor = document.getElementById('enviar-saldo-valor');
+  const callEnviarSaldo = document.getElementById('call-enviar-saldo');
+  const cancelEnviarSaldo = document.getElementById('cancel-enviar-saldo');
+
+  // Monitorar autenticação e exibir nome ou email
+  onAuthStateChanged(auth, (user) => {
+    if (user) {
+      // Prioridade: displayName > email > phoneNumber > texto genérico
+      const nome =
+        user.displayName && user.displayName.trim() !== ''
+          ? user.displayName
+          : user.email && user.email.trim() !== ''
+          ? user.email
+          : user.phoneNumber && user.phoneNumber.trim() !== ''
+          ? user.phoneNumber
+          : "Usuário";
+      welcomeMessage.textContent = `Olá, ${nome}!`;
+    } else {
+      window.location.href = `index.html`;
+      welcomeMessage.textContent = 'Nenhum usuário autenticado.';
+    }
+  });
+
+  // Funções abrir/fechar modais
+  function abrirModal(modal) {
+    modal.classList.add('active');
+    document.body.style.overflow = 'hidden';
+    setTimeout(() => {
+      const input = modal.querySelector('input');
+      if (input) input.focus();
+    }, 100);
+  }
+  function fecharModal(modal) {
+    modal.classList.remove('active');
+    document.body.style.overflow = '';
+    modal.querySelectorAll('input').forEach(i => i.value = '');
+  }
+
+  // Botões principais
+  btnDesativar.onclick = () => alert('Função "Planos" acionada.');
+  btnPedirAdianta.onclick = () => alert('Função "Pedir Adianta" acionada.');
+
+  btnLigaSo.onclick = () => abrirModal(modalLigaSo);
+  btnEnviarSaldo.onclick = () => abrirModal(modalEnviarSaldo);
+
+  btnLogout.onclick = async () => {
+    try {
+      await signOut(auth);
+      window.location.href = `index.html`;
+      welcomeMessage.textContent = 'Sessão terminada.';
+    } catch (e) {
+      alert('Erro ao terminar sessão: ' + e.message);
+    }
+  };
+
+  // Modal Liga Só
+  cancelLigaSo.onclick = () => fecharModal(modalLigaSo);
+  callLigaSo.onclick = () => {
+    const num = inputLigaSo.value.trim();
+    if (!/^\d+$/.test(num)) {
+      alert('Por favor, insira um número válido.');
+      inputLigaSo.focus();
+      return;
+    }
+    window.location.href = `tel:*611*${num}%23`;
+  };
+
+  // Modal Enviar Saldo
+  cancelEnviarSaldo.onclick = () => fecharModal(modalEnviarSaldo);
+  callEnviarSaldo.onclick = () => {
+    const num = inputEnviarNumero.value.trim();
+    const valor = inputEnviarValor.value.trim();
+    if (!/^\d+$/.test(num)) {
+      alert('Por favor, insira um número válido para enviar saldo.');
+      inputEnviarNumero.focus();
+      return;
+    }
+    if (!valor || isNaN(valor) || Number.parseFloat(valor) <= 0) {
+      alert('Por favor, insira um valor válido para enviar.');
+      inputEnviarValor.focus();
+      return;
+    }
+    // Simulando código operação para enviar saldo
+    const codigoEnvio = `*677*${num}*${valor}%23`;
+    window.location.href = `tel:${codigoEnvio}`;
+  };
+
+  // Fechar modais com ESC e clicar fora da caixa modal
+  [modalLigaSo, modalEnviarSaldo].forEach(modal => {
+    modal.addEventListener('keydown', e => {
+      if (e.key === 'Escape') {
+        e.preventDefault();
+        fecharModal(modal);
+      }
+    });
+    modal.addEventListener('click', e => {
+      if (e.target === modal) {
+        fecharModal(modal);
+      }
+    });
+  });
+</script>
+
+</body>
+</html>
+
+    </div>
+  </section>
+</main>
+
+<script>
+  (function() {
+    const tabButtons = document.querySelectorAll('#button-container button');
+    const intentPanels = {
+      home: document.getElementById('intent-home'),
+      profile: document.getElementById('intent-profile'),
+      settings: document.getElementById('intent-settings'),
+    };
+
+    function setActiveIntent(intentKey) {
+      // Ativa botão
+      tabButtons.forEach(btn => {
+        const isActive = btn.dataset.intent === intentKey;
+        btn.classList.toggle('active', isActive);
+        btn.setAttribute('aria-selected', isActive ? 'true' : 'false');
+        btn.tabIndex = isActive ? 0 : -1;
+      });
+      // Exibe painel correspondente
+      Object.keys(intentPanels).forEach(key => {
+        const panel = intentPanels[key];
+        const active = (key === intentKey);
+        panel.classList.toggle('active', active);
+        panel.setAttribute('aria-hidden', active ? 'false' : 'true');
+      });
+    }
+
+    tabButtons.forEach(btn => {
+      btn.addEventListener('click', () => {
+        if (!btn.classList.contains('active')) {
+          setActiveIntent(btn.dataset.intent);
+        }
+      });
+
+      btn.addEventListener('keydown', e => {
+        const index = Array.from(tabButtons).indexOf(e.target);
+        if (e.key === 'ArrowRight') {
+          e.preventDefault();
+          const nextIndex = (index + 1) % tabButtons.length;
+          tabButtons[nextIndex].focus();
+        } else if (e.key === 'ArrowLeft') {
+          e.preventDefault();
+          const prevIndex = (index - 1 + tabButtons.length) % tabButtons.length;
+          tabButtons[prevIndex].focus();
+        } else if (e.key === 'Enter' || e.key === ' ') {
+          e.preventDefault();
+          if (!tabButtons[index].classList.contains('active')) {
+            setActiveIntent(tabButtons[index].dataset.intent);
+          }
+        }
+      });
+    });
+
+    // Inicializa com "home" ativo
+    setActiveIntent('home');
+  })();
+</script>
+
+</body>
+</html>
