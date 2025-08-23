@@ -221,7 +221,7 @@
       Criar nova conta
     </div>
 
-    <button id="btnLogout" aria-label="Sair da conta">Sair</button>
+    <button style="display:none;" id="btnLogout" aria-label="Sair da conta">Sair</button>
 <!-- Botão/Texto para abrir o overlay -->
 <button onclick="window.location.href='senha.html'"  type="button" style="margin-top: 16px; color: #6a3fa0; background: transparent; border: none; cursor: pointer; font-weight: 600; text-decoration: underline;">
   Esqueci minha senha
@@ -464,39 +464,5 @@
     });
   });
 </script>
-<script>
-  (function() {
-    const ANUNCIO_VISITADO_KEY = 'horaUltimaVisitaAnuncio';
-    const REDIRECIONAR_URL = 'anuncio.html';
-    const HORA_EM_MS = 60 * 60 * 1000;
-
-    function getUltimaVisita() {
-      const ts = localStorage.getItem(ANUNCIO_VISITADO_KEY);
-      return ts ? parseInt(ts, 10) : null;
-    }
-
-    function setUltimaVisita() {
-      localStorage.setItem(ANUNCIO_VISITADO_KEY, Date.now().toString());
-    }
-
-    function verificarERedirecionar() {
-      const ultimaVisita = getUltimaVisita();
-
-      if (ultimaVisita === null) {
-        setUltimaVisita();
-        window.location.href = REDIRECIONAR_URL;
-      } else {
-        const agora = Date.now();
-        if (agora - ultimaVisita >= HORA_EM_MS) {
-          setUltimaVisita();
-          window.location.href = REDIRECIONAR_URL;
-        }
-      }
-    }
-
-    verificarERedirecionar();
-  })();
-</script>
-
 </body>
 </html>

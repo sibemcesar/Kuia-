@@ -1,0 +1,650 @@
+<!DOCTYPE html>
+<html lang="pt">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>Chat Movicel</title>
+<style>
+:root{
+  --bg:#f2f5f7; --card:#fff; --line:#e6e9ef; --text:#1f2937; --muted:#6b7280;
+  --brand:#1a73e8; --in:#ffffff; --out:#1a73e8; --out-text:#ffffff; --radius:14px;
+}
+*{box-sizing:border-box}
+body{width:100%; margin:0;font-family:system-ui,-apple-system,Segoe UI,Roboto,Ubuntu,"Helvetica Neue",Arial,sans-serif;background:var(--bg);color:var(--text)}
+#app{display:grid;grid-template-columns:100% 1fr;width:100%;height:100vh;max-height:100vh}
+  .sidebar, .chat {
+  display: none;
+}
+.sidebar.active, .chat.active {
+  display: flex;
+}
+.sidebar{background:var(--card);border-right:1px solid var(--line);flex-direction:column}
+.topbar{padding:12px 14px;border-bottom:1px solid var(--line);display:flex;align-items:center;gap:10px }
+.me{display:flex;align-items:center;gap:10px;flex:1}
+.me .avatar{width:36px;height:36px;border-radius:50%;object-fit:cover;background:#ddd}
+.me .info{display:flex;flex-direction:column}
+.me .info .name{font-weight:600}
+.actions{display:flex;gap:8px}
+.actions button{background:var(--brand);color:#fff;border:0;border-radius:10px;padding:8px 10px;cursor:pointer}
+.search{padding:8px 12px;border-bottom:1px solid var(--line)}
+.search input{width:100%;padding:10px;border:1px solid var(--line);border-radius:10px;background:#f9fafb}
+.user-list{list-style:none;margin:0;padding:0;overflow:auto}
+.user-item{display:grid;grid-template-columns:48px 1fr auto;align-items:center;gap:10px;padding:10px 12px;cursor:pointer;border-bottom:1px solid var(--line)}
+.user-item:hover{background:#f8fafc}
+.avatar{width:44px;height:44px;border-radius:50%;object-fit:cover;background:#ddd}
+.u-main{display:flex;flex-direction:column;min-width:0}
+.u-name{font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.u-preview{font-size:12px;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.u-right{text-align:right}
+.u-time{font-size:11px;color:var(--muted)}
+.dot{width:10px;height:10px;border-radius:50%}
+.dot.online{background:#10b981}
+.dot.offline{background:#9ca3af}
+
+.chat{flex-direction:column; width:100%; height:100vh;max-height:100vh}
+.chat-header{display:flex;align-items:center;gap:12px;padding:12px;border-bottom:1px solid var(--line);background:var(--card)}
+.chat-header .avatar{width:40px;height:40px}
+.title{display:flex;flex-direction:column}
+.title .name{font-weight:700}
+.title .status{font-size:12px;color:var(--muted);display:flex;align-items:center;gap:6px}
+.messages{flex:1;overflow:auto;padding:14px;background:#eef2f7;display:flex;flex-direction:column;gap:10px}
+.row{display:flex}
+.row.in{justify-content:flex-start}
+.row.out{justify-content:flex-end}
+.bubble{max-width:72%;padding:10px 12px;border-radius:16px;line-height:1.35;word-wrap:break-word;overflow-wrap:anywhere}
+.in .bubble{background:var(--in)}
+.out .bubble{background:#5a2a82;color:var(--out-text)}
+.msg-img{border-radius:10px;max-width:100%;cursor:pointer;display:block}
+.meta{font-size:11px;color:var(--muted);margin-top:4px}
+
+.composer{display:none;gap:8px;padding:10px;border-top:1px solid var(--line);background:var(--card)}
+.composer button{background:#5a2a82;color:#fff;border:0;border-radius:10px;padding:0 14px;cursor:pointer;height:40px}
+#textInput{flex:1;min-height:40px;max-height:120px;resize:none;padding:10px;border:1px solid var(--line);border-radius:10px;background:#fff}
+#btnImage{width:40px;display:grid;place-items:center}
+
+.viewer{position:fixed;inset:0;background:rgba(0,0,0,.9);display:none;place-items:center;z-index:1000}
+.viewer img{max-width:95vw;max-height:90vh;border-radius:12px}
+.viewer-close{position:fixed;top:16px;right:16px;background:#111;color:#fff;border:0;border-radius:10px;padding:8px 12px;cursor:pointer}
+
+.auth{position:fixed;inset:0;background:#0f172acc;display:none;align-items:center;justify-content:center;padding:20px;z-index:1100}
+.auth-card{background:#fff;border-radius:16px;max-width:380px;width:100%;padding:20px;display:flex;flex-direction:column;gap:12px}
+.auth-card h2{margin:0}
+.auth-card input{padding:10px;border:1px solid var(--line);border-radius:10px}
+.row-line{display:flex;gap:8px}
+.row-line>*{flex:1}
+
+.profile{position:fixed;inset:0;background:#0f172acc;display:none;align-items:center;justify-content:center;padding:20px;z-index:1200}
+.profile-card{background:#fff;border-radius:16px;max-width:420px;width:100%;padding:20px;display:flex;flex-direction:column;gap:12px}
+.profile-card h3{margin:0}
+.help{font-size:12px;color:var(--muted)}
+.link{color:var(--brand);text-decoration:none}
+.hidden{display:none}
+</style>
+</head>
+<body>
+<div id="app">
+  <aside class="sidebar">
+    <div class="topbar">
+      <button 
+  onclick="window.location.href='home.html'"
+  style="
+    display: inline-flex;
+        background-color: transparent;
+    align-items: center;
+    gap: 8px;
+    padding: 10px 6px;
+    color: black;
+    font-size: 14px;
+    font-weight: 600;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+  transition: all 0.3s ease;
+  "
+  onmouseover="this.style.transform='scale(1.05)'"
+  onmouseout="this.style.transform='scale(1)'"
+>
+  <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" 
+    stroke-width="2" stroke="currentColor" width="20" height="20">
+    <path stroke-linecap="round" stroke-linejoin="round" 
+      d="M15.75 19.5L8.25 12l7.5-7.5" />
+  </svg>
+  
+</button>  <div class="me">
+        <img id="meAvatar" class="avatar" alt="">
+        <div class="info">
+          <div id="meName" class="name">—</div>
+          <div id="meEmail" class="help">—</div>
+        </div>
+      </div>
+      <div class="actions">
+        <a href="#" id="btnLogout"></a>
+        <button id="btnEdit" style="background:#fff;"><svg
+  xmlns="http://www.w3.org/2000/svg"
+  viewBox="0 0 24 24"
+  width="25"
+  height="25"
+  stroke-width="1.8"
+  stroke="black"
+  fill="none"
+  role="img"
+  aria-label="Perfil"
+  style="
+    display:inline-block;
+    vertical-align:middle;
+    color:white;                 /* cor do traço (currentColor) */
+    border-radius:12px;            /* cantos arredondados do fundo */
+    padding:0px;                   /* respiro visual em volta do ícone */
+    transition:transform .2s ease, color .2s ease, box-shadow .2s ease, background .2s ease;
+    cursor:pointer;
+  "
+  onmouseover="
+    this.style.transform='scale(1.08)';
+    this.style.color='#1a73e8';
+    this.style.boxShadow='0 10px 20px rgba(26,115,232,0.25)';
+    this.style.background='linear-gradient(135deg,#e3f2fd,#e0f7fa)';
+  "
+  onmouseout="
+    this.style.transform='scale(1)';
+    this.style.color='#1f2937';
+    this.style.boxShadow='0 6px 14px rgba(0,0,0,0.15)';
+    this.style.background='linear-gradient(135deg,#e0f2fe,#e6fffa)';
+  "
+>
+  <path stroke-linecap="round" stroke-linejoin="round"
+    d="M17.982 18.725A7.488 7.488 0 0 0 12 15.75a7.488 7.488 0 0 0-5.982 2.975m11.963 0a9 9 0 1 0-11.963 0m11.963 0A8.966 8.966 0 0 1 12 21a8.966 8.966 0 0 1-5.982-2.275M15 9.75a3 3 0 1 1-6 0 3 3 0 0 1 6 0Z" />
+</svg></button>
+        
+      </div>
+    </div>
+    <div class="search">
+      <input id="search" placeholder="Pesquisar usuários..." />
+    </div>
+    <ul id="userList" class="user-list"></ul>
+  </aside>
+
+  <section class="chat">
+    <header class="chat-header">
+      <img id="chatAvatar" class="avatar" alt="">
+      <div class="title">
+        <div id="chatName" class="name">Selecione um usuário</div>
+        <div class="status"><span id="chatDot" class="dot offline"></span><span id="chatStatus">—</span></div>
+      </div>
+    </header>
+    <div id="messages" class="messages"></div>
+    <div id="composer" class="composer">
+      <button id="btnImage" title="Enviar imagem"><svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-6" width:100%;>
+  <path stroke-linecap="round" stroke-linejoin="round" d="M6.827 6.175A2.31 2.31 0 0 1 5.186 7.23c-.38.054-.757.112-1.134.175C2.999 7.58 2.25 8.507 2.25 9.574V18a2.25 2.25 0 0 0 2.25 2.25h15A2.25 2.25 0 0 0 21.75 18V9.574c0-1.067-.75-1.994-1.802-2.169a47.865 47.865 0 0 0-1.134-.175 2.31 2.31 0 0 1-1.64-1.055l-.822-1.316a2.192 2.192 0 0 0-1.736-1.039 48.774 48.774 0 0 0-5.232 0 2.192 2.192 0 0 0-1.736 1.039l-.821 1.316Z" />
+  <path stroke-linecap="round" stroke-linejoin="round" d="M16.5 12.75a4.5 4.5 0 1 1-9 0 4.5 4.5 0 0 1 9 0ZM18.75 10.5h.008v.008h-.008V10.5Z" />
+</svg>
+</button>
+      <input id="imageInput" type="file" accept="image/*" class="hidden" />
+      <textarea id="textInput" rows="1" placeholder="Digite uma mensagem"></textarea>
+      <button id="btnSend">Enviar</button>
+    </div>
+  </section>
+</div>
+
+<div id="viewer" class="viewer">
+  <img id="viewerImg" alt="">
+  <button class="viewer-close" id="viewerClose">Fechar</button>
+</div>
+
+<div id="auth" class="auth">
+  <div class="auth-card">
+    <h2>Entrar</h2>
+    <p class="help">Use a sessão existente ou entre agora.</p>
+    <div class="row-line">
+      <button id="btnGoogle" style="background:#ea4335">Google</button>
+      <button id="btnAnon">Anônimo</button>
+    </div>
+    <p class="help">Após entrar, você poderá definir nome e foto.</p>
+  </div>
+</div>
+
+<div id="profile" class="profile">
+  <div class="profile-card">
+    <h3>Seu perfil</h3>
+    <label>Nome</label>
+    <input id="pName" placeholder="Seu nome" style="
+    display:inline-block;
+    padding:10px 16px;
+    background:linear-gradient(135deg,#4db6ac,#2196f3);
+    color:#fff;
+    font-family:sans-serif;
+    font-size:14px;
+    font-weight:600;
+    border:none;
+    border-radius:8px;
+    cursor:pointer;
+    box-shadow:0 4px 8px rgba(0,0,0,0.15);
+    transition:all 0.3s ease;
+  "
+  onmouseover="this.style.background='linear-gradient(135deg,#2196f3,#4db6ac)'; this.style.transform='scale(1.05)';"
+  onmouseout="this.style.background='linear-gradient(135deg,#4db6ac,#2196f3)'; this.style.transform='scale(1)';"/>
+    <div class="row-line">
+      <div>
+        <label style="display:none">Foto (URL)</label>
+        <input id="pAvatar" placeholder="https://..." style="display:none"/>
+      </div>
+      <div>
+        <label>Adicione sua foto</label>
+        <input id="pFile" type="file" accept="image/*" />
+      </div>
+    </div>
+    <div class="help">A foto pode ser enviada e hospedada automaticamente.</div>
+    <div class="row-line">
+      <button id="pSave">Salvar</button>
+      <button id="pClose" style="background:#6b7280">Fechar</button>
+    </div>
+  </div>
+</div>
+
+<audio id="sndSend" preload="auto" src="data:audio/mp3;base64,//uQZAAAAAAAAAAAAAAAAAAAA..."></audio>
+<audio id="sndRecv" preload="auto" src="data:audio/mp3;base64,//uQZAAAAAAAAAAAAAAAAAAAA..."></audio>
+
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
+<script>
+const firebaseConfig = {
+  apiKey: "AIzaSyCE_vGty5XsV1YqdCi49Ck2xJDSFq284wc",
+  authDomain: "cliente-movicel.firebaseapp.com",
+  databaseURL: "https://cliente-movicel-default-rtdb.firebaseio.com",
+  projectId: "cliente-movicel",
+  storageBucket: "cliente-movicel.firebasestorage.app",
+  messagingSenderId: "215414688375",
+  appId: "1:215414688375:web:2c7d20a0c03c4c0fcfd472",
+  measurementId: "G-7F1RGP9GHV"
+};
+const IMGBB_KEY = "e073e02267a1f0259cd69c562e780659";
+
+firebase.initializeApp(firebaseConfig);
+const auth = firebase.auth();
+const db = firebase.database();
+
+let me = null;
+let meProfile = null;
+let currentChat = null;
+let userStatusCache = {};
+let userPreviewCache = {};
+
+const el = (id)=>document.getElementById(id);
+const meAvatar = el("meAvatar");
+const meName = el("meName");
+const meEmail = el("meEmail");
+const userList = el("userList");
+const search = el("search");
+const chatAvatar = el("chatAvatar");
+const chatName = el("chatName");
+const chatStatus = el("chatStatus");
+const chatDot = el("chatDot");
+const messagesEl = el("messages");
+const composer = el("composer");
+const textInput = el("textInput");
+const btnSend = el("btnSend");
+const btnImage = el("btnImage");
+const imageInput = el("imageInput");
+const viewer = el("viewer");
+const viewerImg = el("viewerImg");
+const viewerClose = el("viewerClose");
+const authModal = el("auth");
+const btnGoogle = el("btnGoogle");
+const btnAnon = el("btnAnon");
+const profileModal = el("profile");
+const pName = el("pName");
+const pAvatar = el("pAvatar");
+const pFile = el("pFile");
+const pSave = el("pSave");
+const pClose = el("pClose");
+const btnEdit = el("btnEdit");
+const btnLogout = el("btnLogout");
+const sndSend = el("sndSend");
+const sndRecv = el("sndRecv");
+
+function now(){ return Date.now(); }
+function chatId(a,b){ return a<b ? a+"_"+b : b+"_"+a; }
+function formatTime(ts){
+  try{
+    const d=new Date(ts); return d.toLocaleTimeString([], {hour:"2-digit",minute:"2-digit"});
+  }catch{ return "" }
+}
+function linkify(text){
+  return text.replace(/(https?:\/\/[^\s]+)/g,'<a class="link" href="$1" target="_blank" rel="noopener noreferrer">$1</a>');
+}
+
+auth.onAuthStateChanged(async user=>{
+  if(user){
+    me = user;
+    authModal.style.display = "none";
+    await ensureProfile();
+    bindPresence();
+    bindUsers();
+    bindStatuses();
+    bindPreviews();
+  }else{
+    authModal.style.display = "flex";
+  }
+});
+
+btnGoogle.onclick = async ()=>{
+  try{
+    const provider = new firebase.auth.GoogleAuthProvider();
+    await auth.signInWithPopup(provider);
+  }catch(e){ alert("Falha no login Google: "+e.message); }
+};
+btnAnon.onclick = async ()=>{
+  try{ await auth.signInAnonymously(); }
+  catch(e){ alert("Falha no login anônimo: "+e.message); }
+};
+btnLogout.onclick = async()=>{ await auth.signOut(); location.reload(); };
+
+btnEdit.onclick = ()=> openProfile();
+pClose.onclick = ()=> profileModal.style.display = "none";
+pFile.onchange = async (e)=>{
+  const file = e.target.files[0]; if(!file) return;
+  const url = await uploadToImgBB(file).catch(()=>null);
+  if(url){ pAvatar.value = url; }
+};
+pSave.onclick = async ()=>{
+  const name = pName.value.trim() || "Usuário";
+  const avatar = pAvatar.value.trim();
+  await db.ref("users/"+me.uid).update({ name, avatar, lastSeen: now() });
+  await me.updateProfile({ displayName:name, photoURL: avatar || null }).catch(()=>{});
+  meProfile = {uid:me.uid, name, avatar};
+  renderMe();
+  profileModal.style.display = "none";
+};
+
+async function ensureProfile(){
+  const snap = await db.ref("users/"+me.uid).get();
+  meProfile = snap.val() || null;
+  if(!meProfile){
+    meProfile = { uid: me.uid, name: me.displayName || "Usuário", avatar: me.photoURL || "", lastSeen: now() };
+    await db.ref("users/"+me.uid).set(meProfile);
+  }else{
+    // sync auth display
+    if(me.displayName !== meProfile.name || me.photoURL !== (meProfile.avatar||"")){
+      try{ await me.updateProfile({displayName: meProfile.name, photoURL: meProfile.avatar||null}); }catch{}
+    }
+  }
+  renderMe();
+  // se não tem nome definido, abre perfil
+  if(!meProfile.name || meProfile.name==="Usuário"){ openProfile(); }
+}
+function renderMe(){
+  meAvatar.src = meProfile.avatar || "";
+  meName.textContent = meProfile.name || "Usuário";
+  meEmail.textContent = me.email || (me.isAnonymous ? "Conectado como Anônimo" : "—");
+  pName.value = meProfile.name || "";
+  pAvatar.value = meProfile.avatar || "";
+}
+function openProfile(){ profileModal.style.display = "flex"; }
+
+function bindPresence(){
+  const statusRef = db.ref("status/"+me.uid);
+  const isOffline = { state:"offline", last_changed: firebase.database.ServerValue.TIMESTAMP };
+  const isOnline = { state:"online", last_changed: firebase.database.ServerValue.TIMESTAMP };
+  db.ref(".info/connected").on("value", snap=>{
+    if(snap.val()===false) return;
+    statusRef.onDisconnect().set(isOffline).then(()=> statusRef.set(isOnline));
+  });
+  // update lastSeen periodically
+  setInterval(()=> db.ref("users/"+me.uid).update({ lastSeen: now() }), 60_000);
+}
+
+function bindUsers(){
+  db.ref("users").on("value", snap=>{
+    const all = snap.val() || {};
+    const arr = Object.keys(all).filter(uid=>uid!==me.uid).map(uid=>({uid, ...all[uid]}));
+    renderUserList(arr);
+  });
+  search.oninput = ()=> filterUserList();
+}
+function bindStatuses(){
+  db.ref("status").on("value", snap=>{
+    userStatusCache = snap.val() || {};
+    updateStatusIndicators();
+  });
+}
+function bindPreviews(){
+  db.ref("userChats/"+me.uid).on("value", snap=>{
+    userPreviewCache = snap.val() || {};
+    filterUserList();
+  });
+}
+
+function renderUserList(users){
+  userList.innerHTML = "";
+  // sort by last message time desc, then name
+  users.sort((a,b)=>{
+    const la = userPreviewCache?.[a.uid]?.lastTime || 0;
+    const lb = userPreviewCache?.[b.uid]?.lastTime || 0;
+    if(lb!==la) return lb-la;
+    return (a.name||"").localeCompare(b.name||"");
+  });
+  users.forEach(u=>{
+    const li = document.createElement("li");
+    li.className = "user-item";
+    li.dataset.uid = u.uid;
+
+    const img = document.createElement("img");
+    img.className = "avatar";
+    img.src = u.avatar || "";
+    img.alt = "";
+
+    const main = document.createElement("div");
+    main.className = "u-main";
+    const nm = document.createElement("div"); nm.className = "u-name"; nm.textContent = u.name || "Sem nome";
+    const pv = document.createElement("div"); pv.className = "u-preview";
+    const preview = userPreviewCache?.[u.uid]?.lastText || "";
+    pv.innerHTML = preview ? sanitizePreview(preview) : "—";
+
+    main.appendChild(nm); main.appendChild(pv);
+
+    const right = document.createElement("div");
+    right.className = "u-right";
+    const time = document.createElement("div");
+    time.className = "u-time";
+    time.textContent = userPreviewCache?.[u.uid]?.lastTime ? formatTime(userPreviewCache?.[u.uid]?.lastTime) : "";
+    const dot = document.createElement("div");
+    dot.className = "dot " + (userStatusCache?.[u.uid]?.state==="online" ? "online":"offline");
+    right.appendChild(time); right.appendChild(dot);
+
+    li.appendChild(img); li.appendChild(main); li.appendChild(right);
+    li.onclick = ()=> openChat(u.uid, u);
+    userList.appendChild(li);
+  });
+  filterUserList();
+  updateStatusIndicators();
+}
+function sanitizePreview(t){
+  // strip tags, keep short
+  const div = document.createElement("div"); div.innerText = t; let s = div.innerText;
+  if(s.length>40) s = s.slice(0,40)+"…";
+  return s;
+}
+function filterUserList(){
+  const q = (search.value||"").toLowerCase().trim();
+  [...userList.children].forEach(li=>{
+    const uid = li.dataset.uid;
+    const name = li.querySelector(".u-name").textContent.toLowerCase();
+    const preview = (userPreviewCache?.[uid]?.lastText||"").toLowerCase();
+    const show = !q || name.includes(q) || preview.includes(q);
+    li.style.display = show ? "" : "none";
+  });
+}
+function updateStatusIndicators(){
+  [...userList.children].forEach(li=>{
+    const uid = li.dataset.uid;
+    const dot = li.querySelector(".dot");
+    if(!dot) return;
+    dot.className = "dot " + (userStatusCache?.[uid]?.state==="online" ? "online":"offline");
+  });
+  if(currentChat){
+    const st = userStatusCache?.[currentChat];
+    chatDot.className = "dot " + (st?.state==="online" ? "online":"offline");
+    chatStatus.textContent = st?.state==="online" ? "online" : "offline";
+  }
+}
+
+let msgListenerRef = null;
+function openChat(uid, user){
+  currentChat = uid;
+  chatName.textContent = user.name || "—";
+  chatAvatar.src = user.avatar || "";
+  const st = userStatusCache?.[uid];
+  chatDot.className = "dot " + (st?.state==="online" ? "online":"offline");
+  chatStatus.textContent = st?.state==="online" ? "online" : "offline";
+  composer.style.display = "flex";
+  messagesEl.innerHTML = "";
+  if(msgListenerRef) msgListenerRef.off();
+  const cid = chatId(me.uid, uid);
+  msgListenerRef = db.ref("chats/"+cid);
+  msgListenerRef.off();
+  msgListenerRef.limitToLast(200).on("child_added", snap=>{
+    const m = snap.val();
+    appendMessage(m);
+    if(m.from!==me.uid){ try{ sndRecv.currentTime=0; sndRecv.play(); }catch{} }
+  });
+  messagesEl.scrollTop = messagesEl.scrollHeight;
+}
+
+function appendMessage(m){
+  const row = document.createElement("div");
+  row.className = "row "+(m.from===me.uid?"out":"in");
+  const bubble = document.createElement("div");
+  bubble.className = "bubble";
+  if(m.type==="text"){
+    bubble.innerHTML = linkify(m.text);
+  }else if(m.type==="image"){
+    const img = document.createElement("img");
+    img.className = "msg-img";
+    img.src = m.url;
+    img.alt = "imagem";
+    img.onclick = ()=> openViewer(m.url);
+    bubble.appendChild(img);
+    if(m.caption){
+      const cap = document.createElement("div"); cap.style.marginTop="6px"; cap.innerHTML = linkify(m.caption);
+      bubble.appendChild(cap);
+    }
+  }
+  const meta = document.createElement("div");
+  meta.className = "meta";
+  meta.textContent = formatTime(m.time);
+  row.appendChild(bubble); row.appendChild(meta);
+  messagesEl.appendChild(row);
+  messagesEl.scrollTop = messagesEl.scrollHeight;
+}
+
+btnSend.onclick = sendText;
+textInput.addEventListener("keydown", (e)=>{
+  if(e.key==="Enter" && !e.shiftKey){ e.preventDefault(); sendText(); }
+});
+function sendText(){
+  const txt = (textInput.value||"").trim();
+  if(!txt || !currentChat) return;
+  sendMessage({type:"text", text: txt});
+  textInput.value = "";
+  try{ sndSend.currentTime=0; sndSend.play(); }catch{}
+}
+
+btnImage.onclick = ()=> imageInput.click();
+imageInput.onchange = async (e)=>{
+  const file = e.target.files?.[0]; if(!file || !currentChat) return;
+  const url = await uploadToImgBB(file).catch(err=>{ alert("Erro ao enviar imagem"); return null; });
+  if(!url) return;
+  sendMessage({type:"image", url});
+  imageInput.value = "";
+};
+
+async function uploadToImgBB(file){
+  const form = new FormData();
+  form.append("image", file);
+  const res = await fetch("https://api.imgbb.com/1/upload?key="+IMGBB_KEY, {method:"POST", body: form});
+  if(!res.ok) throw new Error("HTTP "+res.status);
+  const data = await res.json();
+  const url = data?.data?.url;
+  if(!url) throw new Error("Sem URL");
+  return url;
+}
+
+function sendMessage(payload){
+  const to = currentChat;
+  const cid = chatId(me.uid, to);
+  const m = { from: me.uid, to, time: now(), ...payload };
+  const updates = {};
+  const newKey = db.ref("chats/"+cid).push().key;
+  updates["/chats/"+cid+"/"+newKey] = m;
+
+  const previewText = payload.type==="text" ? payload.text : "🖼️ Imagem";
+  const mePrev = { other: to, lastText: previewText, lastTime: m.time };
+  const toPrev = { other: me.uid, lastText: previewText, lastTime: m.time };
+  updates["/userChats/"+me.uid+"/"+to] = mePrev;
+  updates["/userChats/"+to+"/"+me.uid] = toPrev;
+
+  db.ref().update(updates);
+}
+
+function openViewer(url){
+  viewerImg.src = url;
+  viewer.style.display = "grid";
+}
+viewer.onclick = (e)=>{ if(e.target===viewer || e.target===viewerClose){ viewer.style.display = "none"; viewerImg.src=""; } };
+viewerClose.onclick = ()=>{ viewer.style.display = "none"; viewerImg.src=""; };
+
+// inicial
+composer.style.display = "none";
+  
+  
+</script>
+  <!-- Coloque isso no final do seu <body>, antes de fechar a tag </body> -->
+<!-- Coloque isso no final do seu <body>, antes de fechar </body> -->
+<script>
+  document.addEventListener('DOMContentLoaded', () => {
+    const sidebar = document.querySelector('.sidebar');
+    const chat = document.querySelector('.chat');
+
+    if (!sidebar || !chat) return;
+
+    // Troca de tela ao clicar em qualquer .user-item (ou filhos dele)
+    sidebar.addEventListener('click', (e) => {
+      const userItem = e.target.closest('.user-item');
+      if (!userItem) return;
+
+      sidebar.classList.remove('active');
+      chat.classList.add('active');
+    });
+
+    // Inicializa com sidebar visível
+    sidebar.classList.add('active');
+    chat.classList.remove('active');
+  });
+</script>
+  <script>
+  const sidebar = document.querySelector('.sidebar');
+  const chat = document.querySelector('.chat');
+
+  let touchStartX = 0;
+  let touchEndX = 0;
+
+  chat.addEventListener('touchstart', (e) => {
+    touchStartX = e.changedTouches[0].screenX;
+  });
+
+  chat.addEventListener('touchend', (e) => {
+    touchEndX = e.changedTouches[0].screenX;
+    handleSwipe();
+  });
+
+  function handleSwipe() {
+    const swipeDistance = touchEndX - touchStartX;
+    if (swipeDistance > 80) {
+      // Arrastou da esquerda pra direita → voltar pra lista
+      chat.classList.remove('active');
+      sidebar.classList.add('active');
+    }
+  }
+</script>
+</body>
+</html>
