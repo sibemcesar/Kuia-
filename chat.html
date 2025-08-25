@@ -113,7 +113,7 @@ body{width:100%; margin:0;font-family:system-ui,-apple-system,Segoe UI,Roboto,Ub
   </svg>
   
 </button>  <div class="me">
-        <img id="meAvatar" class="avatar" alt="">
+        <img src="data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='64' height='64' viewBox='0 0 64 64'><circle cx='32' cy='32' r='32' fill='%23e0e0e0'/><circle cx='32' cy='24' r='12' fill='%23bdbdbd'/><path d='M16 52c0-8.8 7.2-16 16-16s16 7.2 16 16' fill='%23bdbdbd'/></svg>" id="meAvatar" class="avatar" alt="">
         <div class="info">
           <div id="meName" class="name">—</div>
           <div id="meEmail" class="help">—</div>
@@ -167,7 +167,7 @@ body{width:100%; margin:0;font-family:system-ui,-apple-system,Segoe UI,Roboto,Ub
 
   <section class="chat">
     <header class="chat-header">
-      <img id="chatAvatar" class="avatar" alt="">
+      <img  id="chatAvatar" class="avatar" alt="">
       <div class="title">
         <div id="chatName" class="name">Selecione um usuário</div>
         <div class="status"><span id="chatDot" class="dot offline"></span><span id="chatStatus">—</span></div>
@@ -432,7 +432,7 @@ function renderUserList(users){
 
     const img = document.createElement("img");
     img.className = "avatar";
-    img.src = u.avatar || "";
+    img.src = u.avatar || "data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='64' height='64' viewBox='0 0 64 64'><circle cx='32' cy='32' r='32' fill='%23e0e0e0'/><circle cx='32' cy='24' r='12' fill='%23bdbdbd'/><path d='M16 52c0-8.8 7.2-16 16-16s16 7.2 16 16' fill='%23bdbdbd'/></svg>";
     img.alt = "";
 
     const main = document.createElement("div");
@@ -494,7 +494,7 @@ let msgListenerRef = null;
 function openChat(uid, user){
   currentChat = uid;
   chatName.textContent = user.name || "—";
-  chatAvatar.src = user.avatar || "";
+  chatAvatar.src = user.avatar || "data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='64' height='64' viewBox='0 0 64 64'><circle cx='32' cy='32' r='32' fill='%23e0e0e0'/><circle cx='32' cy='24' r='12' fill='%23bdbdbd'/><path d='M16 52c0-8.8 7.2-16 16-16s16 7.2 16 16' fill='%23bdbdbd'/></svg>";
   const st = userStatusCache?.[uid];
   chatDot.className = "dot " + (st?.state==="online" ? "online":"offline");
   chatStatus.textContent = st?.state==="online" ? "online" : "offline";
@@ -522,7 +522,7 @@ function appendMessage(m){
   }else if(m.type==="image"){
     const img = document.createElement("img");
     img.className = "msg-img";
-    img.src = m.url;
+    img.src = m.url ;
     img.alt = "imagem";
     img.onclick = ()=> openViewer(m.url);
     bubble.appendChild(img);
