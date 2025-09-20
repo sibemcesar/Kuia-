@@ -1,468 +1,186 @@
 <!DOCTYPE html>
-<html lang="pt-PT">
+<html lang="pt-BR">
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>Movicel Login & Criar Conta Completo</title>
-
+<title>Kuia+ — Rede Social Premium</title>
 <style>
-  /* Reset e base */
-  * {
-    box-sizing: border-box;
+  :root{
+    --roxo:#6a00ff;
+    --roxo-2:#8c4dff;
+    --roxo-3:#b88cff;
+    --txt:#1d1b22;
+    --white:#ffffff;
   }
-  html, body {
-    margin: 0; padding: 0;
-    height: 100vh;
-    font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
-    background-color: #fefefe;
-    color: #222;
-    -webkit-font-smoothing: antialiased;
-    user-select: none;
+
+  /* Fundo animado suave (profissional) */
+  body{
+    margin:0;
+    font-family: Inter, system-ui, -apple-system, "Segoe UI", Roboto, Arial, sans-serif;
+    color: var(--txt);
+    background: radial-gradient(120% 120% at 10% -10%, #6a00ff22, transparent 60%),
+                radial-gradient(100% 140% at 110% 10%, #b88cff1c, transparent 60%),
+                linear-gradient(135deg, #fbfbfe, #f6f3ff);
+    background-attachment: fixed;
+    animation: bgShift 18s ease-in-out infinite;
   }
-  body {
-    display: flex;
-    flex-direction: column;
+  @keyframes bgShift{
+    0%,100%{ background-position: 0% 0%, 100% 0%, 0 0; }
+    50%{ background-position: 10% 4%, 90% 6%, 0 0; }
   }
-  header {
-    background-color: #5a2a82;
-    color: white;
-    padding: 14px 20px;
-    font-weight: 700;
-    font-size: 1.4rem;
+
+  /* Header simples */
+  header{
+    background: linear-gradient(90deg, var(--roxo), var(--roxo-2));
+    color: var(--white);
+    padding: 18px;
     text-align: center;
-    user-select: none;
+    position: sticky; top: 0;
   }
-  main {
-    flex-grow: 1;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    }
-  #authPanel {
-    margin-top: -130px;
-    max-width: 400px;
+  header h1{ margin: 0; font-size: 1.6rem; letter-spacing: .2px; }
+
+  /* Container principal */
+  main{
+    max-width: 920px;
+    margin: 0 auto;
+    padding: 22px 16px 32px;
+    text-align: center;
+  }
+
+  /* Avatar K+ flutuante */
+  .avatar-float{
+    position: fixed;
+    right: 18px;
+    bottom: 52px;
+    width: 68px; height: 68px;
+    border-radius: 50%;
+    background: radial-gradient(circle at 30% 30%, #ffffff, #f3ecff);
+    border: 2px solid #e9ddff;
+    box-shadow: 0 10px 28px rgba(106,0,255,.28);
+    display: grid; place-items: center;
+    z-index: 20;
+    animation: bob 3.8s ease-in-out infinite;
+  }
+  .avatar-float::before{
+    content:"K+";
+    font-weight: 800;
+    font-size: 22px;
+    background: linear-gradient(135deg, var(--roxo), var(--roxo-3));
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+  }
+  @keyframes bob{
+    0%,100%{ transform: translateY(0); }
+    50%{ transform: translateY(-8px); }
+  }
+
+  /* Imagem destaque (pode trocar por screenshot do app) */
+  .hero-img{
     width: 100%;
-    background: transparent;
-    padding: 28px 36px;
-    user-select: text;
-    display: flex;
-    flex-direction: column;
+    max-width: 900px;
+    aspect-ratio: 16/7;
+    border-radius: 14px;
+    background:
+      radial-gradient(120% 160% at 0% 0%, #6a00ff1a, transparent 60%),
+      radial-gradient(120% 180% at 100% 0%, #b88cff1a, transparent 60%),
+      linear-gradient(135deg, #6a00ff, #8c4dff 50%, #b88cff);
+    display: grid; place-items: center;
+    color: #fff;
+    margin: 14px auto 18px;
+    box-shadow: 0 12px 26px rgba(106,0,255,.18);
+    transition: transform .3s ease;
   }
-  
-  form {
-    display: none;
-    flex-direction: column;
-    gap: 18px;
+  .hero-img:hover{ transform: translateY(-2px); }
+  .hero-img span{ font-weight: 700; font-size: clamp(18px, 3.6vw, 28px); }
+
+  /* Bloco de qualidades */
+  .qualidades{
+    text-align: left;
+    background: #ffffffcc;
+    backdrop-filter: blur(6px);
+    border: 1px solid #efe6ff;
+    border-radius: 12px;
+    padding: 16px;
+    margin: 10px 0 14px;
   }
-  form.active {
-    display: flex;
+  .qualidades h2{
+    margin: 0 0 10px;
+    color: var(--roxo);
+    font-size: 1.25rem;
   }
-  label {
-    font-weight: 600;
-    color: #5c2a81;
-    margin-bottom: 6px;
-  }
-  input[type="text"], input[type="email"], input[type="password"] {
-    width: 100%;
-    padding: 12px 16px;
-    font-size: 1.05rem;
-    border: 2px solid #5c2a81;
-    border-radius: 7px;
-    outline-offset: 3px;
-    transition: border-color 0.25s ease;
-    font-family: inherit;
-  }
-  input:focus {
-    border-color: #900000;
-    background: #fff;
-  }
-  button.submit-btn {
+  .qualidades ul{ list-style: none; padding: 0; margin: 0; }
+  .qualidades li{
+    margin-bottom: 10px;
+    padding-left: 22px;
     position: relative;
-    overflow: hidden;
-    cursor: pointer;
-    padding: 14px 0;
+    line-height: 1.55;
+  }
+  .qualidades li::before{
+    content: "✔";
+    position: absolute; left: 0; top: 0;
+    color: var(--roxo);
     font-weight: 700;
-    font-size: 1.18rem;
-    background-color: #5c2a81;
-    border: none;
-    border-radius: 9px;
-    color: white;
-    user-select: none;
-    transition: background-color 0.25s ease;
   }
-  button.submit-btn:disabled {
-    background: #e1a3a3;
-    cursor: default;
-  }
-  button.submit-btn:hover:not(:disabled),
-  button.submit-btn:focus:not(:disabled) {
-    background-color: #900000;
-    outline: none;
-  }
-  .ripple {
-    position: absolute;
-    border-radius: 50%;
-    transform: scale(0);
-    animation: ripple-effect 0.55s linear;
-    background: rgba(255, 255, 255, 0.5);
-    pointer-events: none;
-    will-change: transform, opacity;
-  }
-  @keyframes ripple-effect {
-    to {
-      transform: scale(3.8);
-      opacity: 0;
-    }
-  }
-  .spinner {
-    position: absolute;
-    left: 14px;
-    top: 50%;
-    margin-top: -10px;
-    width: 20px;
-    height: 20px;
-    border: 3px solid white;
-    border-top-color: #900000;
-    border-radius: 50%;
-    animation: spin 1s linear infinite;
-  }
-  @keyframes spin {
-    to { transform: rotate(360deg); }
-  }
-  #toggleLink {
-    margin-top: 28px;
-    cursor: pointer;
+
+  /* Footer com CTA */
+  footer{
+    background: #fff;
+    border-top: 1px solid #efe6ff;
+    padding: 18px;
     text-align: center;
-    color: #5c2a81;
-    font-weight: 700;
-    text-decoration: underline;
-    user-select: none;
+    position: sticky; bottom: 0;
   }
-  #toggleLink:hover, #toggleLink:focus {
-    color: #900000;
-    outline: none;
-  }
-  #errorMessage, #successMessage {
-    min-height: 1.6em;
-    font-weight: 700;
-    font-size: 1rem;
-    margin-bottom: 18px;
-    user-select: none;
-  }
-  #errorMessage {
-    color: #d32f2f;
-  }
-  #successMessage {
-    color: #2e7d32;
-  }
-  #btnLogout {
-    margin-top: 28px;
-    width: 100%;
-    padding: 14px 0;
-    background-color: #c80000;
-    color: white;
-    border: none;
+  .btn{
+    display: inline-flex; align-items: center; gap: 10px;
+    background: linear-gradient(90deg, var(--roxo), var(--roxo-2));
+    color: #fff;
+    padding: 12px 18px;
     border-radius: 10px;
-    font-weight: 700;
-    font-size: 1.15rem;
-    cursor: pointer;
-    user-select: none;
-    display: none;
-    transition: background-color 0.25s ease;
+    font-weight: 800;
+    text-decoration: none;
+    box-shadow: 0 10px 24px rgba(106,0,255,.24);
+    transition: transform .25s ease, box-shadow .25s ease, filter .2s ease;
   }
-  #btnLogout:hover, #btnLogout:focus {
-    background-color: #900000;
-    outline: none;
-  }
-  @media (max-width: 440px) {
-    #authPanel {
-      padding: 24px 20px;
-      max-width: 95vw;
-    }
-    h1 {
-      font-size: 1.7rem;
-      margin-bottom: 28px;
-    }
-  }
+  .btn:hover{ transform: translateY(-2px); box-shadow: 0 14px 28px rgba(106,0,255,.28); }
+  .btn:active{ transform: translateY(0); filter: brightness(.95); }
+  .btn small{ font-weight: 700; opacity: .9; }
+
+  /* Acessibilidade foco */
+  .btn:focus{ outline: 3px solid #e3d4ff; outline-offset: 3px; }
 </style>
 </head>
 <body>
 
-<header>Kuia+ Autenticação</header>
+<header>
+  <h1>Kuia+ — v1.0 Beta </h1>
+</header>
 
 <main>
-  <section id="authPanel" aria-live="polite" aria-label="Painel de autenticação">
-
-     <div id="errorMessage" role="alert" aria-live="assertive"></div>
-    <div id="successMessage" role="alert" aria-live="polite"></div>
-
-    <!-- Formulário Login -->
-    <form id="formLogin" autocomplete="off" novalidate class="active" aria-label="Formulário de login">
-      <label for="loginEmail">Email</label>
-      <input type="email" id="loginEmail" name="email" placeholder="seuemail@gmail.com" autocomplete="username" required />
-      <label for="loginPassword">Senha</label>
-      <input type="password" id="loginPassword" name="password" placeholder="••••••" minlength="6" autocomplete="current-password" required />
-      <button type="submit" class="submit-btn">Entrar</button>
-    </form>
-
-    <!-- Formulário Criar Conta -->
-    <form id="formCreate" autocomplete="off" novalidate aria-label="Formulário para criar conta">
-      <label for="createName">Nome Completo</label>
-      <input type="text" id="createName" name="name" placeholder="Seu nome completo" required autocomplete="name" />
-    
-      <label for="createEmail">Email (somente Gmail)</label>
-      <input type="email" id="createEmail" name="email" placeholder="seuemail@gmail.com" autocomplete="username" pattern=".+@gmail\.com" required />
-      <label for="createPassword">Senha</label>
-      <input type="password" id="createPassword" name="password" placeholder="Crie uma senha (mín 6 caracteres)" minlength="6" autocomplete="new-password" required />
-      <button type="submit" class="submit-btn">Criar Conta</button>
-    </form>
-
-    <div id="toggleLink" tabindex="0" role="button" aria-pressed="false" aria-label="Alternar entre login e criação de conta">
-      Criar nova conta
-    </div>
-
-    <button style="display:none;" id="btnLogout" aria-label="Sair da conta">Sair</button>
-<!-- Botão/Texto para abrir o overlay -->
-<button onclick="window.location.href='senha.html'"  type="button" style="margin-top: 16px; color: #6a3fa0; background: transparent; border: none; cursor: pointer; font-weight: 600; text-decoration: underline;">
-  Esqueci minha senha
-</button>
-
-<!-- Overlay modal de recuperação de conta -->
-<div class="modal-perfil-overlay" id="overlay-recuperar-senha" role="dialog" aria-modal="true" aria-labelledby="titulo-recuperar-senha" tabindex="-1" style="display:none;">
-  <div class="modal-perfil" role="document" style="max-width: 400px;">
-    <h2 id="titulo-recuperar-senha" style="color:#6a3fa0; margin-bottom: 20px; text-align:center;">Recuperar Conta</h2>
-    <form id="form-recuperar-senha" novalidate autocomplete="off">
-      <div class="campo-form">
-        <label for="inputEmailRecuperar">Informe seu e-mail</label>
-        <input type="email" id="inputEmailRecuperar" name="email" required placeholder="seu@email.com" />
-      </div>
-      <div class="btn-group">
-        <button type="button" class="modal-btn btn-cancelar" id="btn-cancelar-recuperar">Cancelar</button>
-        <button type="submit" class="modal-btn btn-salvar">Enviar</button>
-      </div>
-    </form>
+  <div class="hero-img" role="img" aria-label="Destaque do app Kuia+ com tema roxo">
+    <span>Elegante, leve e pronta para monetizar</span>
   </div>
-</div>
+
+  <section class="qualidades">
+    <h2>Por que escolher o Kuia+</h2>
+    <ul>
+      <li>Aplicativo leve — apenas 1 MB.</li>
+      <li>Design roxo moderno e consistente.</li>
+      <li>Privacidade e controles claros para você decidir.</li>
+      <li>Monetização simples e transparente.</li>
+      <li>Experiência rápida, estável e fluida.</li>
+    </ul>
   </section>
 </main>
 
-<script type="module">
-  import { initializeApp } from "https://www.gstatic.com/firebasejs/12.0.0/firebase-app.js";
-  import {
-    getAuth,
-    signInWithEmailAndPassword,
-    createUserWithEmailAndPassword,
-    updateProfile,
-    signOut,
-    onAuthStateChanged,
-  } from "https://www.gstatic.com/firebasejs/12.0.0/firebase-auth.js";
+<footer>
+  <a class="btn" href="https://www.mediafire.com/file/7a8a1iowgcrc7ag/Kuia%252B_v1.0.apk/file" target="_blank" rel="noopener">
+    📥 Baixar Kuia+ App <small>(1 MB)</small>
+  </a>
+</footer>
 
-  // Configurações Firebase
-  const firebaseConfig = {
-    apiKey: "AIzaSyCE_vGty5XsV1YqdCi49Ck2xJDSFq284wc",
-    authDomain: "cliente-movicel.firebaseapp.com",
-    databaseURL: "https://cliente-movicel-default-rtdb.firebaseio.com",
-    projectId: "cliente-movicel",
-    storageBucket: "cliente-movicel.firebasestorage.app",
-    messagingSenderId: "215414688375",
-    appId: "1:215414688375:web:2c7d20a0c03c4c0fcfd472",
-  };
+<!-- Avatar K+ flutuante -->
+<div class="avatar-float" title="Kuia+"></div>
 
-  const app = initializeApp(firebaseConfig);
-  const auth = getAuth(app);
-
-  // DOM Elements
-  const formLogin = document.getElementById("formLogin");
-  const formCreate = document.getElementById("formCreate");
-  const toggleLink = document.getElementById("toggleLink");
-  const errorMessage = document.getElementById("errorMessage");
-  const successMessage = document.getElementById("successMessage");
-  const btnLogout = document.getElementById("btnLogout");
-
-  let currentForm = "login";
-
-  // Função para alternar os formulários
-  function showForm(name) {
-    currentForm = name;
-    if (name === "login") {
-      formLogin.classList.add("active");
-      formCreate.classList.remove("active");
-      toggleLink.textContent = "Criar nova conta";
-      toggleLink.setAttribute("aria-pressed", "false");
-    } else {
-      formCreate.classList.add("active");
-      formLogin.classList.remove("active");
-      toggleLink.textContent = "Já tenho conta";
-      toggleLink.setAttribute("aria-pressed", "true");
-    }
-    clearMessages();
-  }
-
-  function clearMessages() {
-    errorMessage.textContent = "";
-    successMessage.textContent = "";
-  }
-
-  toggleLink.addEventListener("click", () => {
-    // Alterna formulário e texto do toggle
-    if (currentForm === "login") showForm("create");
-    else showForm("login");
-  });
-
-  toggleLink.addEventListener("keydown", e => {
-    if (e.key === "Enter" || e.key === " ") {
-      e.preventDefault();
-      toggleLink.click();
-    }
-  });
-
-  // Mensagens amigáveis para erros comuns
-  function traduzirErroUsuario(code) {
-    switch (code) {
-      case "auth/invalid-email":
-        return "Por favor, informe um email válido.";
-      case "auth/user-disabled":
-        return "Sua conta foi desativada. Contate o suporte.";
-      case "auth/user-not-found":
-        return "Usuário não encontrado. Verifique o email.";
-      case "auth/wrong-password":
-        return "Senha incorreta. Tente novamente.";
-      case "auth/email-already-in-use":
-        return "Este email já está em uso.";
-      case "auth/weak-password":
-        return "Senha muito fraca. Use pelo menos 6 caracteres.";
-      case "auth/too-many-requests":
-        return "Muitas tentativas inválidas. Tente mais tarde.";
-      default:
-        return "Erro inesperado. Por favor, tente novamente.";
-    }
-  }
-
-  // Feedback loading do botão
-  function setLoading(button, loading) {
-    if (loading) {
-      button.disabled = true;
-      button.setAttribute("data-text", button.textContent);
-      button.textContent = "aguarde...";
-      const spinner = document.createElement("span");
-      spinner.className = "spinner";
-      button.appendChild(spinner);
-    } else {
-      button.disabled = false;
-      button.textContent = button.getAttribute("data-text") || "Enviar";
-      const spinner = button.querySelector(".spinner");
-      if (spinner) spinner.remove();
-    }
-  }
-
-  formLogin.addEventListener("submit", async e => {
-    e.preventDefault();
-    clearMessages();
-
-    const btn = formLogin.querySelector("button.submit-btn");
-    setLoading(btn, true);
-
-    const email = formLogin.email.value.trim();
-    const password = formLogin.password.value;
-
-    if (!email || !password) {
-      setLoading(btn, false);
-      errorMessage.textContent = "Todos os campos são obrigatórios.";
-      return;
-    }
-
-    try {
-      await signInWithEmailAndPassword(auth, email, password);
-      successMessage.textContent = "Login realizado com sucesso! Redirecionando...";
-      setTimeout(() => window.location.href = "home.html", 1500);
-    } catch (err) {
-      setLoading(btn, false);
-      errorMessage.textContent = traduzirErroUsuario(err.code);
-    }
-  });
-
-  formCreate.addEventListener("submit", async e => {
-    e.preventDefault();
-    clearMessages();
-
-    const btn = formCreate.querySelector("button.submit-btn");
-    setLoading(btn, true);
-
-    const name = formCreate.name.value.trim();
-    const email = formCreate.email.value.trim();
-    const password = formCreate.password.value;
-
-    if (!name || !email || !password) {
-      setLoading(btn, false);
-      errorMessage.textContent = "Todos os campos são obrigatórios.";
-      return;
-    }
-
-    if (!email.match(/^[\w.+-]+@gmail\.com$/i)) {
-      setLoading(btn, false);
-      errorMessage.textContent = "Por favor, use um email válido do Gmail.";
-      return;
-    }
-
-    if (password.length < 6) {
-      setLoading(btn, false);
-      errorMessage.textContent = "Senha deve ter pelo menos 6 caracteres.";
-      return;
-    }
-
-    try {
-      const userCredential = await createUserWithEmailAndPassword(auth, email, password);
-      await updateProfile(userCredential.user, { displayName: name });
-      successMessage.textContent = "Conta criada com sucesso!";
-      setTimeout(() => window.location.href = "home.html", 1500);
-    } catch (err) {
-      setLoading(btn, false);
-      errorMessage.textContent = traduzirErroUsuario(err.code);
-    }
-  });
-
-  btnLogout.addEventListener("click", async () => {
-    clearMessages();
-    try {
-      await signOut(auth);
-      btnLogout.style.display = "none";
-      showForm("login");
-      successMessage.textContent = "Logout realizado com sucesso!";
-    } catch (err) {
-      errorMessage.textContent = "Erro ao sair da conta. Tente novamente.";
-    }
-  });
-
-  // Verifica autorização persistente e redireciona
-  onAuthStateChanged(auth, (user) => {
-    if (user) {
-      formLogin.style.display = "none";
-      formCreate.style.display = "none";
-      toggleLink.style.display = "none";
-      btnLogout.style.display = "block";
-      clearMessages();
-      window.location.href = "home.html";
-    } else {
-      btnLogout.style.display = "none";
-      toggleLink.style.display = "block";
-      showForm("login");
-    }
-  });
-
-  // Aplica ripple animation nos botões
-  document.querySelectorAll("button.submit-btn").forEach(btn => {
-    btn.addEventListener("click", (e) => {
-      const circle = document.createElement("span");
-      circle.classList.add("ripple");
-      const d = Math.max(btn.clientWidth, btn.clientHeight);
-      circle.style.width = circle.style.height = d + "px";
-      const rect = btn.getBoundingClientRect();
-      circle.style.left = e.clientX - rect.left - d / 2 + "px";
-      circle.style.top = e.clientY - rect.top - d / 2 + "px";
-      btn.appendChild(circle);
-      circle.addEventListener("animationend", () => circle.remove());
-    });
-  });
-</script>
 </body>
 </html>
